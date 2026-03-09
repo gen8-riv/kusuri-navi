@@ -1,0 +1,4684 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>こなぐすり味ナビ</title>
+<meta name="theme-color" content="#2f8fa3">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="こなぐすりナビ">
+<link rel="apple-touch-icon" href="/icons/icon-192.png">
+<link rel="manifest" href="/manifest.json">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --primary: #2f8fa3;
+  --primary-dark: #236e80;
+  --primary-light: #e8f6f8;
+  --header-start: #67c8d7;
+  --header-end: #9adbbd;
+  --bg: #f7fbfb;
+  --card-bg: #fff;
+  --text: #2f4146;
+  --text-light: #6f8489;
+  --border: #d8e7ea;
+  --table-head-bg: #4baec0;
+  --table-head-border: #358a9b;
+  --table-fixed-bg: #f4fbfc;
+  --table-cat-bg: #def2f5;
+  --table-hover: #eef9fb;
+  --good: #27ae60;
+  --ok: #f39c12;
+  --bad: #e74c3c;
+  --radius: 12px;
+  --header-height: 56px;
+  --list-sticky-height: 112px;
+  --compat-head-height: 0px;
+  --compat-cat-width: 28px;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', Meiryo, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  -webkit-text-size-adjust: 100%;
+  padding-bottom: 80px;
+}
+
+/* ヘッダー */
+.header {
+  background: linear-gradient(135deg, var(--header-start) 0%, var(--header-end) 100%);
+  color: #fff;
+  padding: 16px 20px 12px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 3px 14px rgba(72, 151, 168, 0.22);
+  border-bottom: 1px solid rgba(255,255,255,0.35);
+}
+.header h1 { font-size: 18px; font-weight: 700; }
+.header-sub { font-size: 11px; opacity: 0.85; margin-top: 2px; }
+
+.disclaimer-banner {
+  background: linear-gradient(135deg, #fff9e6 0%, #fff5d6 100%);
+  border-bottom: 1px solid #f0d860;
+  padding: 10px 16px;
+}
+.disclaimer-content {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  max-width: 800px;
+  margin: 0 auto;
+}
+.disclaimer-icon {
+  flex-shrink: 0;
+  font-size: 14px;
+  line-height: 1.5;
+}
+.disclaimer-text {
+  font-size: 11px;
+  color: #7a6a00;
+  line-height: 1.5;
+  flex: 1;
+}
+.disclaimer-close {
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  font-size: 16px;
+  color: #b0a050;
+  cursor: pointer;
+  padding: 0 4px;
+  line-height: 1;
+}
+.disclaimer-banner.hidden {
+  display: none;
+}
+
+/* 検索 */
+.search-area {
+  padding: 12px 16px;
+  background: #fff;
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: var(--header-height);
+  z-index: 99;
+}
+.search-box {
+  display: flex;
+  align-items: center;
+  background: #f2f8f9;
+  border-radius: 24px;
+  padding: 8px 16px;
+  gap: 8px;
+  border: 1px solid #e0ecef;
+}
+.search-box input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  font-size: 15px;
+  outline: none;
+  color: var(--text);
+}
+.search-box input::placeholder { color: #bbb; }
+
+/* フィルタータブ */
+.filter-tabs {
+  display: flex;
+  gap: 8px;
+  padding: 10px 16px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.filter-tabs::-webkit-scrollbar { display: none; }
+.filter-tab {
+  flex-shrink: 0;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 500;
+  border: 1.5px solid var(--border);
+  background: #fff;
+  color: var(--text-light);
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.filter-tab.active {
+  background: var(--primary);
+  color: #fff;
+  border-color: var(--primary);
+}
+
+/* メーカーフィルター */
+.maker-filter {
+  display: flex;
+  gap: 6px;
+  padding: 0 16px 10px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.maker-filter::-webkit-scrollbar { display: none; }
+.maker-btn {
+  flex-shrink: 0;
+  padding: 4px 12px;
+  border-radius: 14px;
+  font-size: 11px;
+  border: 1px solid var(--border);
+  background: #fff;
+  color: var(--text-light);
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.maker-btn.active {
+  background: var(--primary-light);
+  color: var(--primary);
+  border-color: var(--primary);
+}
+
+/* 凡例 & 件数 */
+.legend {
+  padding: 8px 16px;
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  font-size: 11px;
+  color: var(--text-light);
+  border-bottom: 1px solid var(--border);
+}
+.legend-item { display: flex; align-items: center; gap: 4px; }
+.legend-dot { width: 8px; height: 8px; border-radius: 50%; }
+.result-count { padding: 4px 16px 8px; font-size: 12px; color: var(--text-light); }
+.review-note {
+  margin: 0 16px 10px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #f3fafb 0%, #ffffff 100%);
+  border: 1px solid #d9ecef;
+  font-size: 12px;
+  color: #55757d;
+  line-height: 1.6;
+}
+.review-note strong {
+  color: var(--primary-dark);
+  font-weight: 700;
+}
+
+/* カード */
+.card-list { padding: 0 12px; }
+.cat-section-header {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--primary);
+  padding: 14px 4px 6px;
+  border-bottom: 2px solid var(--primary);
+  margin-bottom: 8px;
+  margin-top: 6px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.cat-section-header:first-child { margin-top: 0; }
+.cat-section-header .cat-icon {
+  font-size: 14px;
+}
+.card {
+  background: var(--card-bg);
+  border-radius: var(--radius);
+  margin-bottom: 10px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  overflow: hidden;
+  scroll-margin-top: calc(var(--list-sticky-height) + 16px);
+}
+.card-header {
+  padding: 14px 16px 10px;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10px;
+}
+.card-title-area { flex: 1; }
+.card-name-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.card-name { font-size: 15px; font-weight: 700; line-height: 1.3; }
+.kampo-code {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: #fff3e8;
+  color: #b36b1d;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1;
+}
+.card-generic { font-size: 11px; color: var(--text-light); margin-top: 2px; }
+.card-maker { font-size: 10px; color: #aaa; margin-top: 1px; }
+.review-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 6px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: #edf8f2;
+  color: #2b8a57;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1;
+}
+.source-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 6px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: #ecf7fb;
+  color: var(--primary-dark);
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1;
+}
+.card-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+  flex-shrink: 0;
+}
+.card-top-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.card-badges { display: flex; gap: 4px; flex-shrink: 0; flex-wrap: wrap; justify-content: flex-end; max-width: 140px; }
+.card-summary {
+  margin-top: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+.summary-label {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 8px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1;
+  background: var(--primary-light);
+  color: var(--primary);
+}
+.summary-pick {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 9px;
+  border-radius: 999px;
+  background: #eff8f9;
+  color: var(--text);
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1;
+}
+.summary-label-bad {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 8px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1;
+  background: #fdecea;
+  color: #e74c3c;
+}
+.summary-pick-bad {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 9px;
+  border-radius: 999px;
+  background: #fef5f5;
+  color: #c0392b;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1;
+}
+.summary-pick-icon {
+  font-size: 13px;
+}
+.summary-break {
+  flex-basis: 100%;
+  height: 0;
+}
+.summary-note {
+  font-size: 11px;
+  color: var(--text-light);
+  line-height: 1.5;
+  width: 100%;
+}
+.summary-note strong {
+  color: var(--text);
+  font-weight: 700;
+}
+
+.taste-badge {
+  font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 10px; white-space: nowrap;
+}
+.taste-bitter { background: #fdecea; color: #e74c3c; }
+.taste-sweet { background: #fce4ec; color: #e91e8f; }
+.taste-sour { background: #fff8e1; color: #f39c12; }
+.taste-plain { background: #f0f0f0; color: #95a5a6; }
+.taste-astringent { background: #fbe9e7; color: #bf360c; }
+.taste-numbing { background: #e8eaf6; color: #3949ab; }
+
+.type-badge {
+  font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 10px; white-space: nowrap;
+}
+.type-kampo { background: #fff3e0; color: #e65100; }
+
+/* 展開 */
+.card-detail { max-height: 0; overflow: hidden; transition: max-height 0.3s ease; }
+.card.open .card-detail { max-height: 1200px; }
+.card-detail-inner { padding: 0 16px 14px; }
+.expand-icon { font-size: 12px; color: #ccc; transition: transform 0.3s; flex-shrink: 0; margin-top: 4px; }
+.card.open .expand-icon { transform: rotate(180deg); }
+
+.detail-section { margin-bottom: 12px; }
+.detail-label { font-size: 11px; font-weight: 700; color: var(--primary); margin-bottom: 4px; }
+.detail-label-inline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.detail-inline-legend {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-light);
+  display: inline-flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.detail-inline-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+.detail-text { font-size: 13px; color: #555; line-height: 1.6; }
+
+/* 混ぜ物リスト */
+.mix-list { display: flex; flex-direction: column; gap: 6px; }
+.mix-item {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 13px; padding: 6px 10px; border-radius: 8px; background: #f8f8f8;
+}
+.mix-icon { font-size: 18px; flex-shrink: 0; }
+.mix-info { flex: 1; }
+.mix-name { font-weight: 600; color: var(--text); }
+.mix-note { font-size: 11px; color: var(--text-light); }
+.compat-good { border-left: 3px solid var(--good); }
+.compat-ok { border-left: 3px solid var(--ok); }
+.compat-bad { border-left: 3px solid var(--bad); }
+.compat-label { font-size: 10px; font-weight: 700; flex-shrink: 0; width: 16px; text-align: center; }
+.compat-label.good { color: var(--good); }
+.compat-label.ok { color: var(--ok); }
+.compat-label.bad { color: var(--bad); }
+
+.caution-box {
+  font-size: 12px; color: #c0392b; background: #fef5f5;
+  padding: 8px 10px; border-radius: 8px; line-height: 1.5;
+}
+
+/* ジェネリック医薬品 */
+.generic-list { display: flex; flex-direction: column; gap: 4px; }
+.generic-item {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 12px; padding: 5px 10px; border-radius: 8px;
+  background: #edf8fb; border-left: 3px solid #58a9bb;
+}
+.generic-item .gi-name { font-weight: 600; color: var(--text); }
+.generic-item .gi-maker { font-size: 11px; color: var(--text-light); }
+.generic-item .gi-taste-note { font-size: 10px; color: #888; margin-top: 1px; }
+.gi-badge {
+  font-size: 9px; font-weight: 700; padding: 1px 6px; border-radius: 8px;
+  background: #dff1f5; color: #2f8fa3; white-space: nowrap; flex-shrink: 0;
+}
+
+/* ========== 飲み合わせ表 ========== */
+.table-page-header {
+  padding: 14px 16px 8px;
+  font-size: 13px;
+  color: var(--text-light);
+  line-height: 1.5;
+}
+.table-legend {
+  display: flex;
+  gap: 14px;
+  padding: 0 16px 10px;
+  font-size: 12px;
+  color: var(--text);
+  flex-wrap: wrap;
+}
+.table-legend span { display: flex; align-items: center; gap: 3px; }
+.tl-good { color: var(--good); font-weight: 700; }
+.tl-ok { color: #888; font-weight: 700; }
+.tl-bad { color: var(--bad); font-weight: 700; }
+.tl-none { color: #bbb; font-weight: 700; }
+.table-hint {
+  margin: 0 16px 12px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #edf9fb 0%, #f8fcfc 100%);
+  border: 1px solid #d3eaee;
+  font-size: 12px;
+  color: #53757d;
+  line-height: 1.5;
+}
+.table-hint strong {
+  color: var(--primary);
+  font-weight: 700;
+}
+
+.table-wrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 0 0 20px;
+  background: linear-gradient(180deg, #ffffff 0%, #fbfefe 100%);
+  border-top: 1px solid #edf4f5;
+}
+.compat-sticky-head {
+  position: sticky;
+  top: var(--header-height);
+  z-index: 14;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+  background: #fff;
+  margin-bottom: calc(-1 * var(--compat-head-height, 0px));
+  pointer-events: none;
+}
+.compat-sticky-head::-webkit-scrollbar {
+  display: none;
+}
+.compat-sticky-head:empty {
+  display: none;
+}
+.compat-sticky-head .compat-table {
+  margin-bottom: 0;
+}
+.compat-sticky-head .compat-table tbody {
+  display: none;
+}
+.compat-table {
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 11px;
+  min-width: 820px;
+  width: 100%;
+}
+.compat-table th, .compat-table td {
+  border-bottom: 1px solid #e0e0e0;
+  border-right: 1px solid #e0e0e0;
+  padding: 6px 4px;
+  text-align: center;
+  vertical-align: middle;
+}
+.compat-table thead th:first-child,
+.compat-table tbody td:first-child {
+  border-left: 1px solid #e0e0e0;
+}
+.compat-table thead th {
+  background: linear-gradient(180deg, var(--table-head-bg) 0%, var(--primary) 100%);
+  color: #fff;
+  font-weight: 600;
+  font-size: 10px;
+  line-height: 1.3;
+  border-top: none;
+  border-bottom: 2px solid var(--table-head-border);
+  box-shadow: inset 0 -1px 0 rgba(255,255,255,0.16), 0 2px 0 rgba(35,110,128,0.12);
+}
+#compatTable thead {
+  visibility: hidden;
+}
+.compat-table thead th.food-col {
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  padding: 8px 3px;
+  min-width: 28px;
+  letter-spacing: 1px;
+}
+.compat-table .cat-cell {
+  background: var(--table-cat-bg);
+  font-weight: 700;
+  color: var(--primary);
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  letter-spacing: 2px;
+  padding: 8px 4px;
+  min-width: 28px;
+  position: sticky;
+  left: 0;
+  z-index: 7;
+  box-shadow: 6px 0 10px rgba(55, 122, 137, 0.06);
+}
+.compat-table .name-cell {
+  text-align: left;
+  font-weight: 600;
+  white-space: nowrap;
+  padding-left: 8px;
+  background: var(--table-fixed-bg);
+  position: sticky;
+  left: var(--compat-cat-width, 28px);
+  z-index: 8;
+  min-width: 130px;
+  box-shadow: 8px 0 10px rgba(55, 122, 137, 0.08);
+}
+.compat-table thead th.cat-head {
+  position: sticky;
+  left: 0;
+  z-index: 15;
+}
+.compat-table thead th.name-cell {
+  left: var(--compat-cat-width, 28px);
+  z-index: 16;
+  box-shadow: 8px 0 10px rgba(35,110,128,0.16), 0 2px 0 rgba(35,110,128,0.12);
+}
+.compat-table .name-cell a {
+  color: var(--primary);
+  text-decoration: none;
+  border-bottom: 1px dashed var(--primary);
+}
+.compat-table .name-cell button {
+  border: none;
+  background: transparent;
+  padding: 0;
+  color: var(--primary);
+  text-decoration: none;
+  border-bottom: 1px dashed var(--primary);
+  font: inherit;
+  font-weight: inherit;
+  cursor: pointer;
+}
+.compat-table .name-cell a:active,
+.compat-table .name-cell button:active {
+  opacity: 0.6;
+}
+.compat-table .taste-cell, .compat-table .flavor-cell {
+  white-space: nowrap;
+  font-size: 10px;
+  color: var(--text-light);
+  background: var(--table-fixed-bg);
+}
+.compat-table .fav-col,
+.compat-table .fav-cell {
+  min-width: 48px;
+  width: 48px;
+}
+.compat-table .memo-col,
+.compat-table .memo-cell {
+  min-width: 170px;
+  width: 170px;
+}
+.compat-table .table-fav-btn {
+  width: 28px;
+  height: 28px;
+  font-size: 16px;
+}
+.compat-table .table-memo-textarea {
+  min-height: 56px;
+  padding: 8px 9px;
+  font-size: 12px;
+  resize: none;
+}
+.compat-table tbody tr:hover td { background: var(--table-hover); }
+.compat-table tbody tr:hover .name-cell { background: #e4f4f7; }
+.compat-table .sym-good { color: var(--good); font-size: 16px; font-weight: 700; }
+.compat-table .sym-ok { color: #888; font-size: 14px; font-weight: 700; }
+.compat-table .sym-bad { color: var(--bad); font-size: 14px; font-weight: 700; }
+.compat-table .sym-none { color: #ccc; font-size: 12px; }
+
+/* 表カテゴリフィルター */
+.table-filter-tabs {
+  display: flex;
+  gap: 6px;
+  padding: 8px 16px 10px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.table-filter-tabs::-webkit-scrollbar { display: none; }
+
+/* お気に入り */
+.fav-btn {
+  background: #fff; border: 1px solid #d9e9ec; cursor: pointer; padding: 0;
+  width: 32px; height: 32px; border-radius: 50%;
+  font-size: 18px; color: #aec4c9; transition: color 0.2s, border-color 0.2s, background 0.2s, transform 0.2s; flex-shrink: 0;
+  display: inline-flex; align-items: center; justify-content: center;
+}
+.fav-btn.active { color: #e26d8a; border-color: #f2c3cf; background: #fff5f8; }
+.fav-btn:active { transform: scale(0.96); }
+.memo-preview {
+  margin-top: 8px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: #f7fbfc;
+  border: 1px solid #e0edf0;
+}
+.memo-preview-label {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--primary-dark);
+}
+.memo-preview-text {
+  margin-top: 4px;
+  font-size: 12px;
+  color: var(--text-light);
+  line-height: 1.6;
+  white-space: pre-line;
+}
+.memo-textarea {
+  width: 100%;
+  min-height: 92px;
+  border: 1px solid #d7e6e9;
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 13px;
+  color: var(--text);
+  background: #fff;
+  resize: vertical;
+}
+.memo-help {
+  margin-top: 6px;
+  font-size: 11px;
+  color: var(--text-light);
+  line-height: 1.5;
+}
+.card-inline-memo {
+  padding: 0 16px 14px;
+}
+.saved-summary {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding: 0 16px 8px;
+}
+.saved-summary-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: #eef7f9;
+  color: var(--primary-dark);
+  font-size: 11px;
+  font-weight: 700;
+}
+.saved-summary-chip strong {
+  color: var(--primary);
+}
+.med-popup {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+}
+.med-popup-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(20, 37, 42, 0.38);
+}
+.med-popup-card {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: min(92vw, 560px);
+  max-height: 86vh;
+  overflow-y: auto;
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 18px 40px rgba(15, 47, 56, 0.18);
+  padding: 16px;
+}
+.med-popup-close {
+  position: sticky;
+  top: 0;
+  margin-left: auto;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 1px solid #d7e6e9;
+  background: #fff;
+  color: var(--text);
+  font-size: 20px;
+  cursor: pointer;
+  display: block;
+}
+.med-popup-header {
+  padding: 4px 0 10px;
+}
+.med-popup-name {
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--text);
+  line-height: 1.3;
+}
+.med-popup-sub {
+  margin-top: 4px;
+  font-size: 13px;
+  color: var(--text-light);
+}
+.med-popup-body {
+  padding-top: 8px;
+}
+
+/* 空状態 */
+.empty-state { text-align: center; padding: 60px 20px; color: var(--text-light); }
+.empty-state p { font-size: 14px; }
+
+/* 監修レビュー */
+.review-page-header {
+  padding: 16px;
+  font-size: 13px;
+  color: var(--text-light);
+  line-height: 1.6;
+}
+.review-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  padding: 0 16px 12px;
+}
+.review-summary-card {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+}
+.review-summary-label {
+  font-size: 11px;
+  color: var(--text-light);
+}
+.review-summary-value {
+  margin-top: 4px;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.2;
+}
+.review-summary-sub {
+  margin-top: 4px;
+  font-size: 11px;
+  color: var(--text-light);
+}
+.review-actions {
+  padding: 0 16px 12px;
+}
+.review-export-btn {
+  border: 1px solid var(--primary);
+  background: var(--primary);
+  color: #fff;
+  border-radius: 999px;
+  padding: 9px 14px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.review-editor-shell {
+  display: grid;
+  gap: 12px;
+  padding: 0 16px 16px;
+}
+.review-editor-card {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 14px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+}
+.review-editor-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--primary-dark);
+}
+.review-editor-sub {
+  margin-top: 4px;
+  font-size: 11px;
+  color: var(--text-light);
+  line-height: 1.6;
+}
+.review-editor-msg {
+  margin-top: 10px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: #f4fafb;
+  border: 1px solid #d9ecef;
+  font-size: 12px;
+  color: #4f7178;
+}
+.review-editor-grid {
+  display: grid;
+  gap: 10px;
+  margin-top: 12px;
+}
+.review-field label {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--primary-dark);
+  margin-bottom: 4px;
+}
+.review-input,
+.review-select,
+.review-textarea {
+  width: 100%;
+  border: 1px solid #d7e6e9;
+  border-radius: 10px;
+  padding: 9px 10px;
+  font-size: 13px;
+  color: var(--text);
+  background: #fff;
+}
+.review-textarea {
+  min-height: 84px;
+  resize: vertical;
+}
+.review-checkbox-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+.review-checkbox-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--text);
+}
+.review-compat-grid {
+  display: grid;
+  gap: 8px;
+}
+.review-compat-row {
+  display: grid;
+  grid-template-columns: minmax(90px, 1fr) minmax(110px, 160px);
+  gap: 8px;
+  align-items: center;
+}
+.review-compat-label {
+  font-size: 12px;
+  color: var(--text);
+  line-height: 1.4;
+}
+.review-normalized-note {
+  margin-top: 4px;
+  font-size: 11px;
+  color: var(--text-light);
+  line-height: 1.5;
+}
+.review-preview-box {
+  margin-top: 12px;
+  padding: 12px;
+  border-radius: 12px;
+  background: #f8fbfc;
+  border: 1px solid #e2eef0;
+}
+.review-preview-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--primary-dark);
+}
+.review-preview-text {
+  margin-top: 6px;
+  font-size: 12px;
+  color: var(--text-light);
+  line-height: 1.6;
+}
+.review-action-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
+}
+.review-action-btn {
+  border: 1px solid var(--border);
+  background: #fff;
+  color: var(--text);
+  border-radius: 999px;
+  padding: 8px 12px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.review-action-btn.primary {
+  background: var(--primary);
+  color: #fff;
+  border-color: var(--primary);
+}
+.review-action-btn.warn {
+  background: #fff4ef;
+  color: #c25b33;
+  border-color: #f0c4b3;
+}
+.review-select-btn {
+  border: 1px solid var(--primary);
+  background: #fff;
+  color: var(--primary-dark);
+  border-radius: 999px;
+  padding: 6px 10px;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.review-audit-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 12px;
+}
+.review-audit-item {
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: #f8fbfc;
+  border: 1px solid #e2eef0;
+}
+.review-audit-head {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--primary-dark);
+}
+.review-audit-body {
+  margin-top: 4px;
+  font-size: 12px;
+  color: var(--text-light);
+  line-height: 1.5;
+}
+.review-inline-note {
+  margin-top: 10px;
+  font-size: 11px;
+  color: var(--text-light);
+  line-height: 1.6;
+}
+.review-table-wrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 20px;
+}
+.review-groups {
+  padding: 0 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.review-group {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+  overflow: hidden;
+}
+.review-group-head {
+  padding: 12px 14px;
+  border-bottom: 1px solid #e4edef;
+  background: linear-gradient(180deg, #fcfefe 0%, #f3fafb 100%);
+}
+.review-group-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--primary-dark);
+}
+.review-group-meta {
+  margin-top: 4px;
+  font-size: 11px;
+  color: var(--text-light);
+}
+.review-table {
+  width: 100%;
+  min-width: 1180px;
+  border-collapse: collapse;
+  font-size: 12px;
+  background: #fff;
+}
+.review-table th,
+.review-table td {
+  border: 1px solid #dfeaec;
+  padding: 8px 10px;
+  text-align: left;
+  vertical-align: top;
+}
+.review-table th {
+  position: sticky;
+  top: var(--header-height);
+  z-index: 8;
+  background: linear-gradient(180deg, #eff8fa 0%, #dff0f3 100%);
+  color: var(--primary-dark);
+  font-size: 11px;
+}
+.review-table td strong {
+  color: var(--text);
+}
+.review-status-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 8px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1;
+}
+.review-status-verified {
+  background: #edf8f2;
+  color: #24794d;
+}
+.review-status-approved {
+  background: #eef6fb;
+  color: #2d6f95;
+}
+.review-status-pending {
+  background: #fff7e8;
+  color: #af6e17;
+}
+.review-status-needs_revision {
+  background: #fdeeee;
+  color: #c44b45;
+}
+.review-table tr.is-selected td {
+  background: #f4fafb;
+}
+.review-table tr.is-selected td:first-child {
+  box-shadow: inset 3px 0 0 var(--primary);
+}
+
+/* フッター */
+.footer { text-align: center; padding: 30px 16px 20px; font-size: 11px; color: #bbb; line-height: 1.6; }
+.footer-update {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--primary);
+  margin-bottom: 8px;
+}
+.footer-source {
+  font-size: 11px;
+  color: #999;
+  margin-bottom: 8px;
+}
+.footer-source a {
+  color: inherit;
+  text-decoration: underline;
+}
+.footer-notes {
+  font-size: 11px;
+  color: #bbb;
+  line-height: 1.8;
+}
+
+/* 下部ナビ */
+.bottom-nav {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  background: #fff; border-top: 1px solid var(--border);
+  display: flex; justify-content: space-around;
+  padding: 6px 0 env(safe-area-inset-bottom, 8px);
+  z-index: 100;
+}
+.nav-item {
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  font-size: 10px; color: var(--text-light); cursor: pointer; padding: 4px 12px;
+}
+.nav-item.active { color: var(--primary); }
+.nav-item svg { width: 22px; height: 22px; }
+
+.page { display: none; }
+.page.active { display: block; }
+
+@media (min-width: 600px) {
+  .card-list { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .cat-section-header { grid-column: 1 / -1; }
+  .review-summary-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .review-editor-shell { grid-template-columns: minmax(0, 2fr) minmax(280px, 1fr); }
+}
+@media (min-width: 900px) {
+  body { max-width: 900px; margin: 0 auto; }
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>こなぐすり味ナビ</h1>
+  <div class="header-sub">公的資料ベースで粉薬の相性を確認</div>
+</div>
+
+<div class="disclaimer-banner" id="disclaimerBanner">
+  <div class="disclaimer-content">
+    <span class="disclaimer-icon">ℹ️</span>
+    <div class="disclaimer-text">
+      本アプリは医療行為の代替ではありません。服薬に関する最終判断は必ず医師・薬剤師にご確認ください。
+    </div>
+    <button class="disclaimer-close" id="disclaimerClose" aria-label="閉じる">×</button>
+  </div>
+</div>
+
+<!-- 一覧ページ -->
+<div id="page-list" class="page active">
+  <div class="search-area">
+    <div class="search-box">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" id="searchInput" placeholder="薬名・一般名・メーカーで検索..." autocomplete="off" autocapitalize="off" spellcheck="false">
+    </div>
+  </div>
+
+  <div class="filter-tabs" id="categoryTabs"></div>
+
+  <div class="maker-filter" id="makerFilter"></div>
+
+  <div class="review-note" id="publicReviewNote"></div>
+
+  <div class="result-count" id="resultCount"></div>
+  <div class="card-list" id="cardList"></div>
+
+  <div class="empty-state" id="emptyState" style="display:none;">
+    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#ccc" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <p id="emptyStateMessage">該当する薬が見つかりません</p>
+  </div>
+
+  <div class="footer">
+    <div class="footer-update">最終データ更新: 2025年6月</div>
+    <div class="footer-source">
+      出典: <a href="https://www.ncchd.go.jp/hospital/about/section/medicine/nomiawase.pdf" target="_blank" rel="noopener">国立成育医療研究センター 薬剤部「粉薬と服薬補助食品の飲み合わせ」</a>
+    </div>
+    <div class="footer-notes">
+      ※ 本アプリは医療行為の代替ではありません<br>
+      ※ 服薬に関する最終判断は必ず医師・薬剤師にご確認ください<br>
+      ※ 食品に混ぜた薬はすぐに飲みましょう<br>
+      ※ 味や香りはメーカー・ロットにより異なることがあります
+    </div>
+  </div>
+</div>
+
+<!-- 飲み合わせ表ページ -->
+<div id="page-table" class="page">
+  <div class="table-page-header">
+    粉薬と服薬補助食品の相性一覧表
+  </div>
+  <div class="table-legend">
+    <span><span class="tl-good">●</span> 飲みやすい</span>
+    <span><span class="tl-ok">▲</span> 変わらない</span>
+    <span><span class="tl-bad">×</span> 飲みにくい</span>
+    <span><span class="tl-none">―</span> データなし</span>
+  </div>
+  <div class="table-hint"><strong>見方:</strong> 左の「商品名」は固定です。表は左右にスクロールできるので、右側の飲み合わせ評価を見比べてください。</div>
+  <div class="review-note" id="tableReviewNote"></div>
+  <div class="table-filter-tabs" id="tableFilterTabs"></div>
+  <div class="result-count" id="tableCount" style="padding-top:0;"></div>
+  <div class="compat-sticky-head" id="compatStickyHead"></div>
+  <div class="table-wrap" id="tableScrollWrap">
+    <table class="compat-table" id="compatTable"></table>
+  </div>
+  <div class="footer">
+    <div class="footer-update">最終データ更新: 2025年6月</div>
+    <div class="footer-source">
+      出典: <a href="https://www.ncchd.go.jp/hospital/about/section/medicine/nomiawase.pdf" target="_blank" rel="noopener">国立成育医療研究センター 薬剤部「粉薬と服薬補助食品の飲み合わせ」</a>
+    </div>
+    <div class="footer-notes">
+      ※ 本アプリは医療行為の代替ではありません<br>
+      ※ 服薬に関する最終判断は必ず医師・薬剤師にご確認ください<br>
+      ※ 食品に混ぜた薬はすぐに飲みましょう<br>
+      ※ 味や香りはメーカー・ロットにより異なることがあります
+    </div>
+  </div>
+</div>
+
+<!-- 保存済みページ -->
+<div id="page-saved" class="page">
+  <div class="review-note" id="savedReviewNote"></div>
+  <div class="filter-tabs" id="savedFilterTabs" style="padding-top:0;">
+    <div class="filter-tab active" data-saved-filter="all">すべて</div>
+    <div class="filter-tab" data-saved-filter="favorites">お気に入り</div>
+    <div class="filter-tab" data-saved-filter="memo">メモあり</div>
+  </div>
+  <div class="saved-summary" id="savedSummary"></div>
+  <div class="result-count" id="savedCount" style="padding-top:4px;"></div>
+  <div class="card-list" id="savedList"></div>
+  <div class="empty-state" id="savedEmpty" style="display:none;">
+    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#ccc" stroke-width="1.5"><path d="M6 3h9l5 5v13H6z"/><path d="M14 3v5h5"/><path d="M9 13h6"/><path d="M9 17h4"/></svg>
+    <p id="savedEmptyMessage">保存済みの薬はありません</p>
+  </div>
+  <div class="footer">
+    <div class="footer-update">最終データ更新: 2025年6月</div>
+    <div class="footer-source">
+      出典: <a href="https://www.ncchd.go.jp/hospital/about/section/medicine/nomiawase.pdf" target="_blank" rel="noopener">国立成育医療研究センター 薬剤部「粉薬と服薬補助食品の飲み合わせ」</a>
+    </div>
+    <div class="footer-notes">
+      ※ 本アプリは医療行為の代替ではありません<br>
+      ※ 服薬に関する最終判断は必ず医師・薬剤師にご確認ください<br>
+      ※ 食品に混ぜた薬はすぐに飲みましょう<br>
+      ※ 味や香りはメーカー・ロットにより異なることがあります
+    </div>
+  </div>
+</div>
+
+<!-- 監修ページ -->
+<div id="page-review" class="page">
+  <div class="review-page-header">
+    内部レビュー用の一覧です。公開画面には公的資料掲載薬と確認済み追加薬だけを出し、ここでは全薬の確認状態をまとめて見られます。
+  </div>
+  <div class="review-summary-grid" id="reviewSummary"></div>
+  <div class="review-actions">
+    <button type="button" class="review-export-btn" id="reviewExportBtn">監修CSVを出力</button>
+  </div>
+  <div class="review-editor-shell">
+    <div class="review-editor-card" id="reviewEditor"></div>
+    <div class="review-editor-card" id="reviewAudit"></div>
+  </div>
+  <div class="review-groups" id="reviewGroups"></div>
+  <div class="footer">
+    ※ `?review=1` または `#review` 付きで開いた時のみ表示される内部確認モードです<br>
+    ※ これは画面上の分離であり、認証やアクセス制御そのものではありません
+  </div>
+</div>
+
+<!-- 下部ナビ -->
+<div class="bottom-nav">
+  <div class="nav-item active" data-page="page-list">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+    一覧
+  </div>
+  <div class="nav-item" data-page="page-table">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3h18v18H3z"/><path d="M3 9h18"/><path d="M3 15h18"/><path d="M9 3v18"/></svg>
+    飲み合わせ表
+  </div>
+  <div class="nav-item" data-page="page-saved">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+    保存済み
+  </div>
+  <div class="nav-item review-nav" data-page="page-review" style="display:none;">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7H3V5h11"/></svg>
+    監修
+  </div>
+</div>
+
+<div class="med-popup" id="medPopup" style="display:none;">
+  <div class="med-popup-backdrop" id="medPopupBackdrop"></div>
+  <div class="med-popup-card">
+    <button type="button" class="med-popup-close" id="medPopupClose" aria-label="閉じる">×</button>
+    <div id="medPopupBody"></div>
+  </div>
+</div>
+
+<script>
+// ========== 薬データ ==========
+const medicines = [
+  // --- 抗生剤 ---
+  {
+    id: "amoxicillin", name: "ワイドシリン細粒", generic: "アモキシシリン",
+    maker: "Meiji Seika ファルマ", type: "powder", category: ["antibiotics"],
+    tastes: ["sweet"],
+    tasteDetail: "甘いイチゴ風味。後味にやや苦味あり。",
+    generics: [
+      { name: "アモキシシリン細粒10%「日医工」", maker: "日医工", tasteNote: "先発とほぼ同じイチゴ味" },
+      { name: "アモキシシリン細粒10%「トーワ」", maker: "東和薬品", tasteNote: "先発に近い甘い風味" },
+      { name: "パセトシン細粒", maker: "協和キリン", tasteNote: "先発同等品。味はほぼ同じ" }
+    ],
+    mixGood: [
+      { name: "チョコアイス", icon: "\u{1F36B}", note: "苦味をしっかりマスク" },
+      { name: "イチゴジャム", icon: "\u{1F353}", note: "同系統の味で飲みやすい" },
+      { name: "練乳", icon: "\u{1F95B}", note: "甘味で後味を消す" }
+    ],
+    mixOk: [{ name: "ヨーグルト", icon: "\u{1F944}", note: "酸味で少し苦味が出る場合あり" }],
+    mixBad: [{ name: "オレンジジュース", icon: "\u{1F34A}", note: "酸味で苦味が強調される" }],
+    caution: ""
+  },
+  {
+    id: "clarithromycin", name: "クラリスドライシロップ", generic: "クラリスロマイシン",
+    maker: "大正製薬", type: "powder", category: ["antibiotics"],
+    tastes: ["bitter"],
+    tasteDetail: "強い苦味あり。コーティングが溶けると非常に苦い。",
+    generics: [
+      { name: "クラリスロマイシンDS小児用10%「サワイ」", maker: "沢井製薬", tasteNote: "先発同様コーティング有。味はほぼ同じ" },
+      { name: "クラリスロマイシンDS小児用10%「トーワ」", maker: "東和薬品", tasteNote: "先発と同等の苦味対策" },
+      { name: "クラリスロマイシンDS10%小児用「タカタ」", maker: "高田製薬", tasteNote: "コーティング技術は同等" }
+    ],
+    mixGood: [
+      { name: "チョコアイス", icon: "\u{1F36B}", note: "冷たさ+甘味で苦味を最も抑える" },
+      { name: "ココア", icon: "\u2615", note: "苦味をマスクしやすい" }
+    ],
+    mixOk: [{ name: "牛乳（冷たい）", icon: "\u{1F95B}", note: "冷たさが大事。温めるとNG" }],
+    mixBad: [
+      { name: "スポーツドリンク", icon: "\u{1F964}", note: "酸性でコーティングが溶け苦味増大" },
+      { name: "オレンジジュース", icon: "\u{1F34A}", note: "酸性でコーティング破壊" },
+      { name: "ヨーグルト", icon: "\u{1F944}", note: "酸性で苦味大幅UP" },
+      { name: "温かい飲み物", icon: "\u{1FAD6}", note: "熱でコーティングが溶ける" }
+    ],
+    caution: "酸性飲料との混合は絶対に避ける。コーティングが溶けて強烈な苦味が出る。"
+  },
+  {
+    id: "azithromycin", name: "ジスロマック細粒", generic: "アジスロマイシン",
+    maker: "ファイザー", type: "powder", category: ["antibiotics"],
+    tastes: ["bitter"],
+    tasteDetail: "苦味あり。コーティングされているが溶けると苦い。",
+    generics: [
+      { name: "アジスロマイシン細粒小児用10%「サワイ」", maker: "沢井製薬", tasteNote: "先発と同様のコーティング" },
+      { name: "アジスロマイシン細粒小児用10%「トーワ」", maker: "東和薬品", tasteNote: "味は先発とほぼ同等" },
+      { name: "アジスロマイシン細粒小児用10%「タカタ」", maker: "高田製薬", tasteNote: "先発同等" }
+    ],
+    mixGood: [
+      { name: "チョコアイス", icon: "\u{1F36B}", note: "苦味マスクに最適" },
+      { name: "バニラアイス", icon: "\u{1F368}", note: "冷たさと甘味でカバー" }
+    ],
+    mixOk: [{ name: "牛乳", icon: "\u{1F95B}", note: "ほどほどにマスクできる" }],
+    mixBad: [
+      { name: "オレンジジュース", icon: "\u{1F34A}", note: "酸性で苦味増強" },
+      { name: "スポーツドリンク", icon: "\u{1F964}", note: "酸性で苦味増強" }
+    ],
+    caution: "酸性飲料とは混ぜないこと。"
+  },
+  {
+    id: "cefaclor", name: "セファクロル細粒", generic: "セファクロル",
+    maker: "各社", type: "powder", category: ["antibiotics"],
+    tastes: ["sweet", "bitter"],
+    tasteDetail: "甘いが、やや苦味が残る。",
+    generics: [],
+    mixGood: [],
+    mixOk: [],
+    mixBad: [],
+    caution: ""
+  },
+  {
+    id: "cefditoren", name: "メイアクトMS小児用細粒", generic: "セフジトレンピボキシル",
+    maker: "Meiji Seika ファルマ", type: "powder", category: ["antibiotics"],
+    tastes: ["bitter", "sweet"],
+    tasteDetail: "バナナ風味の甘い味付けだが、後味に苦味が残る。",
+    generics: [
+      { name: "セフジトレンピボキシル細粒小児用10%「サワイ」", maker: "沢井製薬", tasteNote: "先発と同等のバナナ味" },
+      { name: "セフジトレンピボキシル細粒小児用10%「CH」", maker: "長生堂/日本ジェネリック", tasteNote: "味は先発とほぼ同じ" }
+    ],
+    mixGood: [
+      { name: "チョコアイス", icon: "\u{1F36B}", note: "苦味を消しやすい" },
+      { name: "ココア", icon: "\u2615", note: "苦味マスクに良い" }
+    ],
+    mixOk: [
+      { name: "バナナ", icon: "\u{1F34C}", note: "同系統で違和感少ない" },
+      { name: "牛乳", icon: "\u{1F95B}", note: "まあまあマスクできる" }
+    ],
+    mixBad: [{ name: "スポーツドリンク", icon: "\u{1F964}", note: "酸性で苦味増" }],
+    caution: ""
+  },
+  {
+    id: "cefcapene", name: "フロモックス小児用細粒", generic: "セフカペンピボキシル",
+    maker: "塩野義製薬", type: "powder", category: ["antibiotics"],
+    tastes: ["sweet"],
+    tasteDetail: "ストロベリー風味で甘め。比較的飲みやすい。",
+    generics: [
+      { name: "セフカペンピボキシル細粒小児用10%「サワイ」", maker: "沢井製薬", tasteNote: "イチゴ味。先発とほぼ同等" },
+      { name: "セフカペンピボキシル細粒小児用10%「CH」", maker: "長生堂/日本ジェネリック", tasteNote: "先発同等の味" },
+      { name: "セフカペンピボキシル細粒小児用10%「日医工」", maker: "日医工", tasteNote: "先発同等" }
+    ],
+    mixGood: [
+      { name: "イチゴジャム", icon: "\u{1F353}", note: "同系の味でなじむ" },
+      { name: "アイスクリーム", icon: "\u{1F368}", note: "甘味で美味しく飲める" }
+    ],
+    mixOk: [
+      { name: "牛乳", icon: "\u{1F95B}", note: "問題なく混ぜられる" },
+      { name: "ヨーグルト", icon: "\u{1F944}", note: "少し酸味が出るがOK" }
+    ],
+    mixBad: [],
+    caution: ""
+  },
+  {
+    id: "tosufloxacin", name: "オゼックス細粒", generic: "トスフロキサシン",
+    maker: "富山化学工業", type: "powder", category: ["antibiotics"],
+    tastes: ["bitter"],
+    tasteDetail: "苦味が強い。コーティングが溶けると更に苦い。",
+    generics: [
+      { name: "トスフロキサシン細粒小児用15%「サワイ」", maker: "沢井製薬", tasteNote: "先発同様の苦味あり" },
+      { name: "トスフロキサシン細粒小児用15%「タカタ」", maker: "高田製薬", tasteNote: "味は先発と同等" }
+    ],
+    mixGood: [
+      { name: "チョコアイス", icon: "\u{1F36B}", note: "冷たさ+苦味マスク" },
+      { name: "ココア", icon: "\u2615", note: "ビター同士で相殺" }
+    ],
+    mixOk: [{ name: "バニラアイス", icon: "\u{1F368}", note: "甘味でやや緩和" }],
+    mixBad: [{ name: "酸性飲料", icon: "\u{1F34A}", note: "苦味が強くなる" }],
+    caution: "小児にはやむを得ない場合のみ使用。"
+  },
+
+  // --- かぜ薬 ---
+  {
+    id: "carbocisteine", name: "ムコダインDS", generic: "カルボシステイン",
+    maker: "杏林製薬", type: "powder", category: ["cold"],
+    tastes: ["sour", "sweet"],
+    tasteDetail: "甘酸っぱい味。比較的飲みやすい。",
+    generics: [
+      { name: "カルボシステインDS50%「サワイ」", maker: "沢井製薬", tasteNote: "先発と同等の甘酸っぱい味" },
+      { name: "カルボシステインDS50%「トーワ」", maker: "東和薬品", tasteNote: "味は先発とほぼ同じ" },
+      { name: "カルボシステインDS50%「タカタ」", maker: "高田製薬", tasteNote: "先発同等" }
+    ],
+    mixGood: [
+      { name: "ヨーグルト", icon: "\u{1F944}", note: "酸味同士で自然な味" },
+      { name: "りんごジュース", icon: "\u{1F34E}", note: "酸味がなじむ" },
+      { name: "アイスクリーム", icon: "\u{1F368}", note: "甘味で飲みやすい" }
+    ],
+    mixOk: [
+      { name: "牛乳", icon: "\u{1F95B}", note: "問題なし" },
+      { name: "お茶", icon: "\u{1F375}", note: "味の変化少ない" }
+    ],
+    mixBad: [],
+    caution: ""
+  },
+  {
+    id: "ambroxol", name: "ムコソルバンDS", generic: "アンブロキソール",
+    maker: "帝人ファーマ", type: "powder", category: ["cold"],
+    tastes: ["sweet"],
+    tasteDetail: "甘いストロベリー風味。飲みやすい。",
+    generics: [
+      { name: "アンブロキソールDS小児用1.5%「トーワ」", maker: "東和薬品", tasteNote: "先発に近い甘い味" },
+      { name: "アンブロキソールDS小児用1.5%「日医工」", maker: "日医工", tasteNote: "先発同等" },
+      { name: "アンブロキソールDS小児用1.5%「サワイ」", maker: "沢井製薬", tasteNote: "先発同等の飲みやすさ" }
+    ],
+    mixGood: [
+      { name: "ジュース全般", icon: "\u{1F9C3}", note: "味の相性良い" },
+      { name: "アイスクリーム", icon: "\u{1F368}", note: "甘くて飲みやすい" }
+    ],
+    mixOk: [{ name: "牛乳", icon: "\u{1F95B}", note: "問題なし" }],
+    mixBad: [],
+    caution: ""
+  },
+  {
+    id: "tipepidine", name: "アスベリン散", generic: "チペピジン",
+    maker: "田辺三菱製薬", type: "powder", category: ["cold"],
+    tastes: ["sweet"],
+    tasteDetail: "オレンジ風味。甘くて飲みやすい。",
+    generics: [
+      { name: "チペピジンヒベンズ酸塩散1%「日医工」", maker: "日医工", tasteNote: "先発同等のオレンジ風味" }
+    ],
+    mixGood: [
+      { name: "オレンジジュース", icon: "\u{1F34A}", note: "同系統の味" },
+      { name: "アイスクリーム", icon: "\u{1F368}", note: "甘くて美味しい" }
+    ],
+    mixOk: [{ name: "牛乳", icon: "\u{1F95B}", note: "問題なし" }],
+    mixBad: [],
+    caution: "尿が赤くなることがあるが無害。保護者に説明を。"
+  },
+  {
+    id: "acetaminophen", name: "カロナール細粒", generic: "アセトアミノフェン",
+    maker: "あゆみ製薬", type: "powder", category: ["cold"],
+    tastes: ["bitter", "sweet"],
+    tasteDetail: "オレンジ風味の甘い味付け。後味にわずかな苦味。",
+    generics: [
+      { name: "アセトアミノフェン細粒20%「JG」", maker: "日本ジェネリック", tasteNote: "味付けなし。やや苦い" },
+      { name: "アセトアミノフェン細粒20%「NP」", maker: "ニプロ", tasteNote: "味付けなし。カロナールより苦め" },
+      { name: "アンヒバ坐剤（坐薬）", maker: "あゆみ製薬", tasteNote: "経口ではないため味の問題なし" }
+    ],
+    mixGood: [
+      { name: "チョコアイス", icon: "\u{1F36B}", note: "後味の苦味を消す" },
+      { name: "ジュース", icon: "\u{1F9C3}", note: "味がなじむ" },
+      { name: "練乳", icon: "\u{1F95B}", note: "甘味でカバー" }
+    ],
+    mixOk: [{ name: "ヨーグルト", icon: "\u{1F944}", note: "問題なし" }],
+    mixBad: [],
+    caution: "空腹時はなるべく避ける。"
+  },
+  {
+    id: "tamiflu", name: "タミフルドライシロップ", generic: "オセルタミビル",
+    maker: "中外製薬", type: "powder", category: ["cold"],
+    tastes: ["bitter"],
+    tasteDetail: "非常に苦い。子どもが最も嫌がる薬の一つ。",
+    generics: [
+      { name: "オセルタミビルDS3%「サワイ」", maker: "沢井製薬", tasteNote: "先発同様に苦い。混ぜ方も同じ" },
+      { name: "オセルタミビルDS3%「日医工」", maker: "日医工", tasteNote: "先発同等の苦味" },
+      { name: "オセルタミビルDS3%「トーワ」", maker: "東和薬品", tasteNote: "先発同等" }
+    ],
+    mixGood: [
+      { name: "チョコアイス", icon: "\u{1F36B}", note: "苦味マスクに最も有効" },
+      { name: "チョコシロップ", icon: "\u{1F36B}", note: "濃い甘味でカバー" }
+    ],
+    mixOk: [
+      { name: "ココア", icon: "\u2615", note: "ビター系でやや緩和" },
+      { name: "バニラアイス", icon: "\u{1F368}", note: "冷たさでやや緩和" }
+    ],
+    mixBad: [
+      { name: "オレンジジュース", icon: "\u{1F34A}", note: "苦味が際立つ" },
+      { name: "スポーツドリンク", icon: "\u{1F964}", note: "苦味が際立つ" },
+      { name: "ヨーグルト", icon: "\u{1F944}", note: "酸味で苦さ増加" }
+    ],
+    caution: "服用後の異常行動に注意（10代は特に）。5日間飲み切り。"
+  },
+
+  // --- 胃腸薬 ---
+  {
+    id: "domperidone", name: "ナウゼリンドライシロップ", generic: "ドンペリドン",
+    maker: "協和キリン", type: "powder", category: ["stomach"],
+    tastes: ["sweet"],
+    tasteDetail: "甘い味付けで飲みやすい。",
+    generics: [
+      { name: "ドンペリドンDS小児用1%「サワイ」", maker: "沢井製薬", tasteNote: "先発と同等の甘い味" },
+      { name: "ドンペリドンDS小児用1%「トーワ」", maker: "東和薬品", tasteNote: "先発同等" }
+    ],
+    mixGood: [
+      { name: "アイスクリーム", icon: "\u{1F368}", note: "甘味で飲みやすい" },
+      { name: "ジュース", icon: "\u{1F9C3}", note: "味が紛れる" }
+    ],
+    mixOk: [{ name: "牛乳", icon: "\u{1F95B}", note: "問題なし" }],
+    mixBad: [],
+    caution: "吐き気の症状がある時は、少量の食べ物に混ぜて素早く服用を。"
+  },
+  {
+    id: "biofermin", name: "ビオフェルミンR散", generic: "耐性乳酸菌",
+    maker: "ビオフェルミン製薬", type: "powder", category: ["stomach"],
+    tastes: ["plain"],
+    tasteDetail: "ほぼ無味。わずかに甘い。",
+    generics: [
+      { name: "エンテロノンR散", maker: "EA ファーマ", tasteNote: "ほぼ無味。同等品" },
+      { name: "ラックビーR散", maker: "興和", tasteNote: "ほぼ無味。同等品" }
+    ],
+    mixGood: [
+      { name: "何にでもOK", icon: "\u2705", note: "味の影響がほぼない" },
+      { name: "牛乳", icon: "\u{1F95B}", note: "乳製品と好相性" },
+      { name: "ヨーグルト", icon: "\u{1F944}", note: "乳酸菌つながり" }
+    ],
+    mixOk: [],
+    mixBad: [{ name: "熱い飲み物", icon: "\u{1FAD6}", note: "菌が死滅する可能性" }],
+    caution: "抗生剤と同時服用OK（耐性乳酸菌のため）。"
+  },
+
+  // --- 抗アレルギー ---
+  {
+    id: "ketotifen", name: "ザジテンドライシロップ", generic: "ケトチフェン",
+    maker: "ノバルティスファーマ", type: "powder", category: ["allergy"],
+    tastes: ["sweet"],
+    tasteDetail: "甘い味付け。比較的飲みやすい。",
+    generics: [
+      { name: "ケトチフェンDS小児用0.1%「サワイ」", maker: "沢井製薬", tasteNote: "先発同等の甘い味" },
+      { name: "ケトチフェンDS小児用0.1%「トーワ」", maker: "東和薬品", tasteNote: "先発同等" }
+    ],
+    mixGood: [
+      { name: "アイスクリーム", icon: "\u{1F368}", note: "甘味で美味しく" },
+      { name: "ジュース", icon: "\u{1F9C3}", note: "味がなじむ" }
+    ],
+    mixOk: [{ name: "牛乳", icon: "\u{1F95B}", note: "問題なし" }],
+    mixBad: [],
+    caution: "眠気が出やすい。就寝前の服用も検討。"
+  },
+  {
+    id: "montelukast", name: "キプレス細粒 / シングレア細粒", generic: "モンテルカスト",
+    maker: "杏林製薬 / MSD", type: "powder", category: ["allergy", "asthma"],
+    tastes: ["plain"],
+    tasteDetail: "ほぼ無味。わずかに甘い。飲みやすい。",
+    generics: [
+      { name: "モンテルカスト細粒4mg「サワイ」", maker: "沢井製薬", tasteNote: "先発同等" },
+      { name: "モンテルカスト細粒4mg「トーワ」", maker: "東和薬品", tasteNote: "先発同等" },
+      { name: "モンテルカスト細粒4mg「日医工」", maker: "日医工", tasteNote: "先発同等" }
+    ],
+    mixGood: [
+      { name: "アイスクリーム", icon: "\u{1F368}", note: "甘くて飲みやすい" },
+      { name: "ゼリー", icon: "\u{1F36E}", note: "服薬ゼリーとも好相性" }
+    ],
+    mixOk: [{ name: "何でもOK", icon: "\u2705", note: "味の影響が少ない" }],
+    mixBad: [],
+    caution: "就寝前に服用。光に弱いので開封後すぐ服用を。"
+  },
+  {
+    id: "pranlukast", name: "オノンドライシロップ", generic: "プランルカスト",
+    maker: "小野薬品工業", type: "powder", category: ["allergy", "asthma"],
+    tastes: ["sweet"],
+    tasteDetail: "甘いヨーグルト風味。飲みやすい。",
+    generics: [
+      { name: "プランルカストDS10%「サワイ」", maker: "沢井製薬", tasteNote: "先発と似たヨーグルト風味" },
+      { name: "プランルカストDS10%「トーワ」", maker: "東和薬品", tasteNote: "先発同等" },
+      { name: "プランルカストDS10%「タカタ」", maker: "高田製薬", tasteNote: "先発同等" }
+    ],
+    mixGood: [
+      { name: "ヨーグルト", icon: "\u{1F944}", note: "同系統の味で自然" },
+      { name: "牛乳", icon: "\u{1F95B}", note: "乳製品と好相性" }
+    ],
+    mixOk: [{ name: "ジュース", icon: "\u{1F9C3}", note: "問題なし" }],
+    mixBad: [],
+    caution: ""
+  },
+  {
+    id: "levocetirizine", name: "ザイザルシロップ用DS", generic: "レボセチリジン",
+    maker: "グラクソ・スミスクライン", type: "powder", category: ["allergy"],
+    tastes: ["sweet"],
+    tasteDetail: "甘い味付けで飲みやすい。",
+    generics: [
+      { name: "レボセチリジン塩酸塩DS0.5%「トーワ」", maker: "東和薬品", tasteNote: "先発同等" },
+      { name: "レボセチリジン塩酸塩DS0.5%「サワイ」", maker: "沢井製薬", tasteNote: "先発同等" }
+    ],
+    mixGood: [
+      { name: "水", icon: "\u{1F4A7}", note: "甘いのでそのままでOK" },
+      { name: "ジュース", icon: "\u{1F9C3}", note: "味がなじむ" }
+    ],
+    mixOk: [{ name: "牛乳", icon: "\u{1F95B}", note: "問題なし" }],
+    mixBad: [],
+    caution: "眠気に注意。1日1回就寝前推奨。"
+  },
+
+  // --- 気管支 ---
+  {
+    id: "tulobuterol", name: "ホクナリンドライシロップ", generic: "ツロブテロール",
+    maker: "マイランEPD", type: "powder", category: ["asthma"],
+    tastes: ["sweet"],
+    tasteDetail: "甘い味付け。比較的飲みやすい。",
+    generics: [
+      { name: "ツロブテロールDS0.1%「サワイ」", maker: "沢井製薬", tasteNote: "先発同等" },
+      { name: "ツロブテロールDS0.1%「トーワ」", maker: "東和薬品", tasteNote: "先発同等" }
+    ],
+    mixGood: [
+      { name: "アイスクリーム", icon: "\u{1F368}", note: "甘味で飲みやすい" },
+      { name: "ジュース", icon: "\u{1F9C3}", note: "味がなじむ" }
+    ],
+    mixOk: [{ name: "牛乳", icon: "\u{1F95B}", note: "問題なし" }],
+    mixBad: [],
+    caution: ""
+  },
+  {
+    id: "theophylline", name: "テオドールドライシロップ", generic: "テオフィリン",
+    maker: "田辺三菱製薬", type: "powder", category: ["asthma"],
+    tastes: ["bitter"],
+    tasteDetail: "苦味あり。甘い味付けだが後味に苦さ。",
+    generics: [
+      { name: "テオフィリンDS20%「サワイ」", maker: "沢井製薬", tasteNote: "先発同様の苦味あり" },
+      { name: "テオフィリンDS20%「日医工」", maker: "日医工", tasteNote: "先発同等" }
+    ],
+    mixGood: [
+      { name: "チョコアイス", icon: "\u{1F36B}", note: "苦味マスクに効果的" },
+      { name: "ココア", icon: "\u2615", note: "ビター系でなじむ" }
+    ],
+    mixOk: [{ name: "牛乳", icon: "\u{1F95B}", note: "やや苦さ残る" }],
+    mixBad: [{ name: "グレープフルーツ", icon: "\u{1F34A}", note: "相互作用の可能性" }],
+    caution: "中毒域が狭い。用量厳守。痙攣等の副作用に注意。"
+  },
+
+  // --- 漢方 ---
+  {
+    id: "syoseiryuto", name: "小青竜湯", generic: "ショウセイリュウトウ",
+    maker: "ツムラ(19)", type: "kampo", category: ["cold", "allergy"],
+    tastes: ["sour", "bitter"],
+    tasteDetail: "酸味と苦味が混在。やや渋味もある。",
+    generics: [
+      { name: "クラシエ小青竜湯エキス細粒", maker: "クラシエ", tasteNote: "ツムラよりやや甘めとの声あり" },
+      { name: "コタロー小青竜湯エキス細粒", maker: "小太郎漢方", tasteNote: "ツムラと同等" }
+    ],
+    mixGood: [
+      { name: "ココア", icon: "\u2615", note: "苦味をうまくマスク" },
+      { name: "チョコアイス", icon: "\u{1F36B}", note: "冷たさと甘味で飲みやすく" }
+    ],
+    mixOk: [
+      { name: "りんごジュース", icon: "\u{1F34E}", note: "酸味同士でなじむ" }
+    ],
+    mixBad: [{ name: "お湯のみ", icon: "\u{1F4A7}", note: "苦味がダイレクトに感じられる" }],
+    caution: "麻黄含有。心疾患・高血圧の方は注意。"
+  },
+  {
+    id: "bakumondoto", name: "麦門冬湯", generic: "バクモンドウトウ",
+    maker: "ツムラ(29)", type: "kampo", category: ["cold"],
+    tastes: ["sweet", "plain"],
+    tasteDetail: "ほんのり甘く飲みやすい。漢方の中では服用しやすい部類。",
+    generics: [
+      { name: "クラシエ麦門冬湯エキス細粒", maker: "クラシエ", tasteNote: "ツムラと同等の飲みやすさ" }
+    ],
+    mixGood: [
+      { name: "ココア", icon: "\u2615", note: "飲みやすくなる" }
+    ],
+    mixOk: [{ name: "お湯", icon: "\u{1F4A7}", note: "本来の飲み方で問題なし" }],
+    mixBad: [],
+    caution: ""
+  },
+  {
+    id: "kakkonto", name: "葛根湯", generic: "カッコントウ",
+    maker: "ツムラ(1)", type: "kampo", category: ["cold"],
+    tastes: ["bitter", "sweet"],
+    tasteDetail: "やや甘苦い。生姜の風味あり。漢方としては飲みやすい方。",
+    generics: [
+      { name: "クラシエ葛根湯エキス細粒", maker: "クラシエ", tasteNote: "ツムラよりやや甘いとの声あり" },
+      { name: "コタロー葛根湯エキス細粒", maker: "小太郎漢方", tasteNote: "ツムラと同等" }
+    ],
+    mixGood: [
+      { name: "ココア", icon: "\u2615", note: "苦味をマスク" }
+    ],
+    mixOk: [
+      { name: "お湯", icon: "\u{1F4A7}", note: "標準的な飲み方" },
+      { name: "スポーツドリンク", icon: "\u{1F964}", note: "やや味は変わるがOK" }
+    ],
+    mixBad: [],
+    caution: "麻黄含有。発汗作用あり。汗をかいている時は避ける。"
+  },
+  {
+    id: "saireito", name: "柴苓湯", generic: "サイレイトウ",
+    maker: "ツムラ(114)", type: "kampo", category: ["stomach"],
+    tastes: ["bitter"],
+    tasteDetail: "苦味が強い。漢方独特の風味。",
+    generics: [
+      { name: "クラシエ柴苓湯エキス細粒", maker: "クラシエ", tasteNote: "ツムラと同等の苦味" }
+    ],
+    mixGood: [
+      { name: "チョコアイス", icon: "\u{1F36B}", note: "苦味を最もマスクできる" },
+      { name: "ココア", icon: "\u2615", note: "苦味をカバー" }
+    ],
+    mixOk: [],
+    mixBad: [{ name: "そのままお湯", icon: "\u{1F4A7}", note: "苦味が辛い子が多い" }],
+    caution: ""
+  },
+  {
+    id: "goreisan", name: "五苓散", generic: "ゴレイサン",
+    maker: "ツムラ(17)", type: "kampo", category: ["stomach"],
+    tastes: ["plain", "bitter"],
+    tasteDetail: "やや苦味はあるが、漢方の中では飲みやすい方。",
+    generics: [
+      { name: "クラシエ五苓散エキス細粒", maker: "クラシエ", tasteNote: "ツムラと同等" },
+      { name: "コタロー五苓散エキス細粒", maker: "小太郎漢方", tasteNote: "ツムラと同等" }
+    ],
+    mixGood: [
+      { name: "チョコアイス", icon: "\u{1F36B}", note: "苦味をカバー" },
+      { name: "ココア", icon: "\u2615", note: "飲みやすくなる" },
+      { name: "りんごジュース", icon: "\u{1F34E}", note: "味がなじむ" }
+    ],
+    mixOk: [{ name: "お湯", icon: "\u{1F4A7}", note: "通常の飲み方でOK" }],
+    mixBad: [],
+    caution: "嘔吐時は少量の水で練って頬の内側に塗布する方法もあり。"
+  },
+  {
+    id: "daikentyuto", name: "大建中湯", generic: "ダイケンチュウトウ",
+    maker: "ツムラ(100)", type: "kampo", category: ["stomach"],
+    tastes: ["sweet", "numbing"],
+    tasteDetail: "甘味が強い（膠飴由来）。山椒の痺れる刺激がある。",
+    generics: [
+      { name: "クラシエ大建中湯エキス細粒", maker: "クラシエ", tasteNote: "ツムラと同等。甘味+山椒の刺激" }
+    ],
+    mixGood: [
+      { name: "ココア", icon: "\u2615", note: "甘味となじむ" }
+    ],
+    mixOk: [{ name: "お湯", icon: "\u{1F4A7}", note: "甘いので比較的飲みやすい" }],
+    mixBad: [],
+    caution: "山椒の刺激があるため、嫌がる子もいる。"
+  },
+  {
+    id: "hangeshashinto", name: "半夏瀉心湯", generic: "ハンゲシャシントウ",
+    maker: "ツムラ(14)", type: "kampo", category: ["stomach"],
+    tastes: ["bitter"],
+    tasteDetail: "苦味が強い。黄連・黄芩由来の苦味。",
+    generics: [
+      { name: "クラシエ半夏瀉心湯エキス細粒", maker: "クラシエ", tasteNote: "ツムラと同等の苦味" }
+    ],
+    mixGood: [
+      { name: "チョコアイス", icon: "\u{1F36B}", note: "苦味を最もカバーできる" },
+      { name: "ココア", icon: "\u2615", note: "ビター同士でなじむ" }
+    ],
+    mixOk: [],
+    mixBad: [{ name: "お湯のみ", icon: "\u{1F4A7}", note: "苦味が辛い" }],
+    caution: ""
+  },
+  {
+    id: "syoukenchuto", name: "小建中湯", generic: "ショウケンチュウトウ",
+    maker: "ツムラ(99)", type: "kampo", category: ["stomach"],
+    tastes: ["sweet"],
+    tasteDetail: "膠飴（水飴）由来の甘味が強い。子どもに飲みやすい漢方の代表格。",
+    generics: [
+      { name: "クラシエ小建中湯エキス細粒", maker: "クラシエ", tasteNote: "ツムラと同等の甘味" },
+      { name: "コタロー小建中湯エキス細粒", maker: "小太郎漢方", tasteNote: "ツムラと同等" }
+    ],
+    mixGood: [
+      { name: "お湯", icon: "\u{1F4A7}", note: "甘いのでそのままでOK" }
+    ],
+    mixOk: [{ name: "牛乳", icon: "\u{1F95B}", note: "甘いミルクになる" }],
+    mixBad: [],
+    caution: "子どもが最も飲みやすい漢方の一つ。"
+  },
+  {
+    id: "maoto", name: "麻黄湯", generic: "マオウトウ",
+    maker: "ツムラ(27)", type: "kampo", category: ["cold"],
+    tastes: ["bitter", "sweet"],
+    tasteDetail: "やや苦甘い。杏仁の風味あり。",
+    generics: [
+      { name: "クラシエ麻黄湯エキス細粒", maker: "クラシエ", tasteNote: "ツムラと同等" }
+    ],
+    mixGood: [
+      { name: "ココア", icon: "\u2615", note: "苦味をカバー" },
+      { name: "チョコアイス", icon: "\u{1F36B}", note: "冷たさと甘味で飲みやすく" }
+    ],
+    mixOk: [],
+    mixBad: [],
+    caution: "麻黄含有。インフルエンザ初期に使用。発汗後は中止。"
+  },
+  {
+    id: "yokukansankachimpihange", name: "抑肝散加陳皮半夏", generic: "ヨクカンサンカチンピハンゲ",
+    maker: "ツムラ(83)", type: "kampo", category: ["cold"],
+    tastes: ["bitter", "sweet"],
+    tasteDetail: "苦味と甘味が混在。独特の風味。",
+    generics: [
+      { name: "クラシエ抑肝散加陳皮半夏エキス細粒", maker: "クラシエ", tasteNote: "ツムラと同等" }
+    ],
+    mixGood: [
+      { name: "チョコアイス", icon: "\u{1F36B}", note: "苦味マスクに最適" },
+      { name: "ココア", icon: "\u2615", note: "飲みやすくなる" }
+    ],
+    mixOk: [],
+    mixBad: [],
+    caution: ""
+  },
+
+  // ===== 追加: 抗生剤 =====
+  {
+    id: "cefdinir", name: "セフゾン細粒", generic: "セフジニル",
+    maker: "アステラス製薬", type: "powder", category: ["antibiotics"],
+    tastes: ["sweet"],
+    tasteDetail: "甘いストロベリー味。抗生剤の中ではかなり飲みやすい部類。",
+    generics: [
+      { name: "セフジニル細粒10%「サワイ」", maker: "沢井製薬", tasteNote: "先発同等の甘い味" },
+      { name: "セフジニル細粒10%「トーワ」", maker: "東和薬品", tasteNote: "先発同等" }
+    ],
+    mixGood: [
+      { name: "アイスクリーム", icon: "\u{1F368}", note: "甘味同士で美味しく" },
+      { name: "牛乳", icon: "\u{1F95B}", note: "相性良い" }
+    ],
+    mixOk: [
+      { name: "ヨーグルト", icon: "\u{1F944}", note: "問題なし" },
+      { name: "ジュース", icon: "\u{1F9C3}", note: "味がなじむ" }
+    ],
+    mixBad: [],
+    caution: "鉄剤との併用で便が赤くなることがある。保護者に事前説明を。"
+  },
+  {
+    id: "cefpodoxime", name: "バナンDS", generic: "セフポドキシムプロキセチル",
+    maker: "グラクソ・スミスクライン", type: "powder", category: ["antibiotics"],
+    tastes: ["bitter", "sweet"],
+    tasteDetail: "フルーツ味の甘い味付けだが、後味にやや苦味。メイアクトに近い味。",
+    generics: [
+      { name: "セフポドキシムプロキセチルDS小児用10%「サワイ」", maker: "沢井製薬", tasteNote: "先発同等" },
+      { name: "セフポドキシムプロキセチルDS小児用10%「トーワ」", maker: "東和薬品", tasteNote: "先発同等" }
+    ],
+    mixGood: [
+      { name: "チョコアイス", icon: "\u{1F36B}", note: "苦味マスクに効果的" },
+      { name: "ココア", icon: "\u2615", note: "苦味をカバー" }
+    ],
+    mixOk: [
+      { name: "牛乳", icon: "\u{1F95B}", note: "やや苦さ残る" }
+    ],
+    mixBad: [
+      { name: "スポーツドリンク", icon: "\u{1F964}", note: "酸性で苦味増" }
+    ],
+    caution: ""
+  },
+  {
+    id: "cefteram", name: "トミロン細粒", generic: "セフテラムピボキシル",
+    maker: "富士フイルムファーマ", type: "powder", category: ["antibiotics"],
+    tastes: ["sweet"],
+    tasteDetail: "甘いイチゴ味。比較的飲みやすい。",
+    generics: [
+      { name: "セフテラムピボキシル細粒小児用10%「サワイ」", maker: "沢井製薬", tasteNote: "先発同等" }
+    ],
+    mixGood: [
+      { name: "アイスクリーム", icon: "\u{1F368}", note: "甘味で飲みやすい" },
+      { name: "イチゴジャム", icon: "\u{1F353}", note: "同系統の味" }
+    ],
+    mixOk: [
+      { name: "牛乳", icon: "\u{1F95B}", note: "問題なし" }
+    ],
+    mixBad: [],
+    caution: "ピボキシル基を含む。低カルニチン血症に注意（長期投与時）。"
+  },
+  {
+    id: "fosfomycin", name: "ホスミシンDS", generic: "ホスホマイシン",
+    maker: "Meiji Seika ファルマ", type: "powder", category: ["antibiotics"],
+    tastes: ["sweet"],
+    tasteDetail: "甘いパイン味。飲みやすい。抗菌スペクトルが独特で他剤と交差耐性なし。",
+    generics: [
+      { name: "ホスホマイシンDS400「日医工」", maker: "日医工", tasteNote: "先発同等" }
+    ],
+    mixGood: [
+      { name: "ジュース", icon: "\u{1F9C3}", note: "果汁系と相性良い" },
+      { name: "アイスクリーム", icon: "\u{1F368}", note: "甘味で飲みやすい" }
+    ],
+    mixOk: [
+      { name: "牛乳", icon: "\u{1F95B}", note: "問題なし" },
+      { name: "ヨーグルト", icon: "\u{1F944}", note: "問題なし" }
+    ],
+    mixBad: [],
+    caution: "1回量が多くなりがち。分割して飲ませる工夫を。"
+  },
+  {
+    id: "ampc_cva", name: "オーグメンチン配合DS", generic: "アモキシシリン/クラブラン酸",
+    maker: "グラクソ・スミスクライン", type: "powder", category: ["antibiotics"],
+    tastes: ["sweet"],
+    tasteDetail: "甘いストロベリー味。やや粉っぽさがあるが飲みやすい方。",
+    generics: [
+      { name: "クラバモックス小児用配合DS", maker: "グラクソ・スミスクライン", tasteNote: "同メーカー別製品。味は同等" }
+    ],
+    mixGood: [
+      { name: "アイスクリーム", icon: "\u{1F368}", note: "冷たさと甘味で飲みやすく" },
+      { name: "牛乳", icon: "\u{1F95B}", note: "粉っぽさが和らぐ" }
+    ],
+    mixOk: [
+      { name: "ヨーグルト", icon: "\u{1F944}", note: "問題なし" },
+      { name: "ジュース", icon: "\u{1F9C3}", note: "問題なし" }
+    ],
+    mixBad: [],
+    caution: "要冷蔵。下痢の副作用が比較的多い。整腸剤の併用を検討。"
+  },
+  {
+    id: "cephalexin", name: "ケフレックス細粒", generic: "セファレキシン",
+    maker: "塩野義製薬", type: "powder", category: ["antibiotics"],
+    tastes: ["sweet"],
+    tasteDetail: "甘いオレンジ味。第一世代セフェムで古典的だが今も使われる。",
+    generics: [
+      { name: "セファレキシン細粒「日医工」", maker: "日医工", tasteNote: "先発同等" }
+    ],
+    mixGood: [
+      { name: "オレンジジュース", icon: "\u{1F34A}", note: "同系統の味でなじむ" },
+      { name: "アイスクリーム", icon: "\u{1F368}", note: "甘味で飲みやすい" }
+    ],
+    mixOk: [
+      { name: "牛乳", icon: "\u{1F95B}", note: "問題なし" }
+    ],
+    mixBad: [],
+    caution: "1日3〜4回投与。服用回数が多いので飲み忘れ注意。"
+  },
+  {
+    id: "erythromycin", name: "エリスロシンDS", generic: "エリスロマイシン",
+    maker: "アボットジャパン", type: "powder", category: ["antibiotics"],
+    tastes: ["sweet"],
+    tasteDetail: "甘いバニラ風味。コーティングで苦味を抑えているが溶けると苦い。",
+    generics: [
+      { name: "エリスロマイシンDS10%「サワイ」", maker: "沢井製薬", tasteNote: "先発同等" }
+    ],
+    mixGood: [
+      { name: "チョコアイス", icon: "\u{1F36B}", note: "苦味マスクに有効" },
+      { name: "ココア", icon: "\u2615", note: "苦味をカバー" },
+      { name: "牛乳", icon: "\u{1F95B}", note: "冷たい牛乳が良い" }
+    ],
+    mixOk: [],
+    mixBad: [
+      { name: "オレンジジュース", icon: "\u{1F34A}", note: "酸性でコーティング溶解" },
+      { name: "スポーツドリンク", icon: "\u{1F964}", note: "酸性で苦味増大" },
+      { name: "ヨーグルト", icon: "\u{1F944}", note: "酸性で苦味出る" }
+    ],
+    caution: "クラリスと同じマクロライド系。酸性飲料で苦味が出る。"
+  },
+
+  // ===== 追加: かぜ・鎮咳去痰 =====
+  {
+    id: "dextromethorphan", name: "メジコン散", generic: "デキストロメトルファン",
+    maker: "塩野義製薬", type: "powder", category: ["cold"],
+    tastes: ["bitter"],
+    tasteDetail: "苦味あり。粉っぽく飲みにくいと感じる子が多い。",
+    generics: [
+      { name: "デキストロメトルファン散10%「日医工」", maker: "日医工", tasteNote: "先発同等の苦味" }
+    ],
+    mixGood: [
+      { name: "チョコアイス", icon: "\u{1F36B}", note: "苦味を最もカバーできる" },
+      { name: "ココア", icon: "\u2615", note: "ビター同士でなじむ" }
+    ],
+    mixOk: [
+      { name: "牛乳", icon: "\u{1F95B}", note: "やや苦さ残る" }
+    ],
+    mixBad: [
+      { name: "お湯", icon: "\u{1F4A7}", note: "苦味がダイレクト" }
+    ],
+    caution: "中枢性鎮咳薬。痰のある咳には不向き。"
+  },
+  {
+    id: "tranexamic", name: "トランサミン散", generic: "トラネキサム酸",
+    maker: "第一三共", type: "powder", category: ["cold"],
+    tastes: ["plain", "bitter"],
+    tasteDetail: "わずかに苦い程度。無味に近く比較的飲みやすい。",
+    generics: [
+      { name: "トラネキサム酸散50%「YD」", maker: "陽進堂", tasteNote: "先発同等" }
+    ],
+    mixGood: [
+      { name: "ジュース", icon: "\u{1F9C3}", note: "味がほぼないので何でも" },
+      { name: "アイスクリーム", icon: "\u{1F368}", note: "問題なし" }
+    ],
+    mixOk: [
+      { name: "牛乳", icon: "\u{1F95B}", note: "問題なし" },
+      { name: "お茶", icon: "\u{1F375}", note: "味の変化少ない" }
+    ],
+    mixBad: [],
+    caution: "のどの痛み・口内炎に処方されることが多い。"
+  },
+  {
+    id: "baloxavir", name: "ゾフルーザ顆粒", generic: "バロキサビル マルボキシル",
+    maker: "塩野義製薬", type: "powder", category: ["cold"],
+    tastes: ["plain"],
+    tasteDetail: "ほぼ無味。顆粒が小さく飲みやすい。1回服用で済む。",
+    generics: [],
+    mixGood: [
+      { name: "アイスクリーム", icon: "\u{1F368}", note: "甘味で飲みやすい" },
+      { name: "ジュース", icon: "\u{1F9C3}", note: "味の影響なし" }
+    ],
+    mixOk: [
+      { name: "牛乳", icon: "\u{1F95B}", note: "問題なし" }
+    ],
+    mixBad: [
+      { name: "乳製品（大量）", icon: "\u{1F95B}", note: "カルシウムで吸収低下の可能性" }
+    ],
+    caution: "1回服用のみ。体重10kg以上から。乳製品は少量なら問題なし。"
+  },
+  {
+    id: "bromhexine", name: "ビソルボン細粒", generic: "ブロムヘキシン",
+    maker: "日本ベーリンガー", type: "powder", category: ["cold"],
+    tastes: ["bitter"],
+    tasteDetail: "やや苦味あり。独特の風味がある。",
+    generics: [
+      { name: "ブロムヘキシン塩酸塩細粒2%「日医工」", maker: "日医工", tasteNote: "先発同等" }
+    ],
+    mixGood: [
+      { name: "チョコアイス", icon: "\u{1F36B}", note: "苦味マスクに効果的" },
+      { name: "ココア", icon: "\u2615", note: "苦味をカバー" }
+    ],
+    mixOk: [
+      { name: "牛乳", icon: "\u{1F95B}", note: "やや緩和" }
+    ],
+    mixBad: [],
+    caution: "痰の粘度を下げる。ムコダイン・ムコソルバンとの使い分けを。"
+  },
+
+  // ===== 追加: 抗アレルギー =====
+  {
+    id: "fexofenadine", name: "アレグラDS", generic: "フェキソフェナジン",
+    maker: "サノフィ", type: "powder", category: ["allergy"],
+    tastes: ["sweet"],
+    tasteDetail: "甘いストロベリー味。非常に飲みやすい。眠気が少ない第二世代。",
+    generics: [
+      { name: "フェキソフェナジンDS5%「サワイ」", maker: "沢井製薬", tasteNote: "先発同等の甘い味" },
+      { name: "フェキソフェナジンDS5%「トーワ」", maker: "東和薬品", tasteNote: "先発同等" }
+    ],
+    mixGood: [
+      { name: "アイスクリーム", icon: "\u{1F368}", note: "甘味で美味しく" },
+      { name: "ジュース", icon: "\u{1F9C3}", note: "味がなじむ" }
+    ],
+    mixOk: [
+      { name: "牛乳", icon: "\u{1F95B}", note: "問題なし" },
+      { name: "ヨーグルト", icon: "\u{1F944}", note: "問題なし" }
+    ],
+    mixBad: [],
+    caution: "眠気が最も少ない抗ヒスタミン薬。食事の影響あり（空腹時推奨）。"
+  },
+  {
+    id: "epinastine", name: "アレジオンDS", generic: "エピナスチン",
+    maker: "日本ベーリンガー", type: "powder", category: ["allergy"],
+    tastes: ["sweet"],
+    tasteDetail: "甘い味付け。やや粉っぽさがあるが飲みやすい。",
+    generics: [
+      { name: "エピナスチンDS1%「サワイ」", maker: "沢井製薬", tasteNote: "先発同等" },
+      { name: "エピナスチンDS1%「トーワ」", maker: "東和薬品", tasteNote: "先発同等" }
+    ],
+    mixGood: [
+      { name: "アイスクリーム", icon: "\u{1F368}", note: "甘味で飲みやすい" },
+      { name: "ジュース", icon: "\u{1F9C3}", note: "味がなじむ" }
+    ],
+    mixOk: [
+      { name: "牛乳", icon: "\u{1F95B}", note: "問題なし" }
+    ],
+    mixBad: [],
+    caution: "1日1回。眠気少なめ。3歳以上から。"
+  },
+  {
+    id: "loratadine", name: "クラリチンDS", generic: "ロラタジン",
+    maker: "バイエル薬品", type: "powder", category: ["allergy"],
+    tastes: ["sweet"],
+    tasteDetail: "甘いピーチ味。非常に飲みやすい。",
+    generics: [
+      { name: "ロラタジンDS1%「サワイ」", maker: "沢井製薬", tasteNote: "先発同等" },
+      { name: "ロラタジンDS1%「トーワ」", maker: "東和薬品", tasteNote: "先発同等" }
+    ],
+    mixGood: [
+      { name: "アイスクリーム", icon: "\u{1F368}", note: "甘味で美味しく" },
+      { name: "ジュース", icon: "\u{1F9C3}", note: "味がなじむ" }
+    ],
+    mixOk: [
+      { name: "牛乳", icon: "\u{1F95B}", note: "問題なし" },
+      { name: "ヨーグルト", icon: "\u{1F944}", note: "問題なし" }
+    ],
+    mixBad: [],
+    caution: "1日1回。眠気が少ない。3歳以上。"
+  },
+  {
+    id: "olopatadine", name: "アレロックDS", generic: "オロパタジン",
+    maker: "協和キリン", type: "powder", category: ["allergy"],
+    tastes: ["bitter", "sweet"],
+    tasteDetail: "甘い味付けだが後味にやや苦味。効果は強いが眠気も出やすい。",
+    generics: [
+      { name: "オロパタジンDS5%「サワイ」", maker: "沢井製薬", tasteNote: "先発同等" },
+      { name: "オロパタジンDS5%「トーワ」", maker: "東和薬品", tasteNote: "先発同等" }
+    ],
+    mixGood: [
+      { name: "チョコアイス", icon: "\u{1F36B}", note: "後味の苦さをカバー" },
+      { name: "アイスクリーム", icon: "\u{1F368}", note: "甘味で飲みやすい" }
+    ],
+    mixOk: [
+      { name: "牛乳", icon: "\u{1F95B}", note: "問題なし" },
+      { name: "ジュース", icon: "\u{1F9C3}", note: "やや苦さ残る" }
+    ],
+    mixBad: [],
+    caution: "1日2回。眠気が出やすいので就寝前寄りの服用も検討。"
+  },
+  {
+    id: "chlorpheniramine", name: "ポララミン散", generic: "クロルフェニラミン",
+    maker: "MSD", type: "powder", category: ["allergy", "cold"],
+    tastes: ["bitter"],
+    tasteDetail: "苦味が強い。第一世代抗ヒスタミン薬。粉のまま飲むと非常に苦い。",
+    generics: [
+      { name: "クロルフェニラミンマレイン酸塩散1%「NP」", maker: "ニプロ", tasteNote: "先発同等の苦味" }
+    ],
+    mixGood: [
+      { name: "チョコアイス", icon: "\u{1F36B}", note: "苦味を最もカバーできる" },
+      { name: "ココア", icon: "\u2615", note: "苦味マスクに良い" }
+    ],
+    mixOk: [
+      { name: "牛乳", icon: "\u{1F95B}", note: "やや苦さ残る" }
+    ],
+    mixBad: [
+      { name: "お湯", icon: "\u{1F4A7}", note: "苦味がダイレクト" }
+    ],
+    caution: "第一世代。眠気が非常に強い。痙攣のリスクがある児には慎重投与。"
+  },
+  {
+    id: "cyproheptadine", name: "ペリアクチン散", generic: "シプロヘプタジン",
+    maker: "日医工", type: "powder", category: ["allergy", "cold"],
+    tastes: ["bitter"],
+    tasteDetail: "強い苦味。粉のまま飲むのは困難な子が多い。食欲増進目的でも使用。",
+    generics: [],
+    mixGood: [
+      { name: "チョコアイス", icon: "\u{1F36B}", note: "苦味マスクに最適" },
+      { name: "ココア", icon: "\u2615", note: "苦味をカバー" }
+    ],
+    mixOk: [
+      { name: "牛乳", icon: "\u{1F95B}", note: "やや苦さ残るが飲める" }
+    ],
+    mixBad: [
+      { name: "ヨーグルト", icon: "\u{1F944}", note: "酸味で苦味が目立つ" },
+      { name: "オレンジジュース", icon: "\u{1F34A}", note: "苦味が際立つ" }
+    ],
+    caution: "食欲増進・体重増加作用あり。眠気が強い。"
+  },
+
+  // ===== 追加: 胃腸薬 =====
+  {
+    id: "miyabm", name: "ミヤBM細粒", generic: "酪酸菌（宮入菌）",
+    maker: "ミヤリサン製薬", type: "powder", category: ["stomach"],
+    tastes: ["plain"],
+    tasteDetail: "ほぼ無味無臭。わずかに甘い。何に混ぜても味を変えない。",
+    generics: [],
+    mixGood: [
+      { name: "何にでもOK", icon: "\u2705", note: "味の影響がほぼない" },
+      { name: "牛乳", icon: "\u{1F95B}", note: "好相性" },
+      { name: "ヨーグルト", icon: "\u{1F944}", note: "好相性" }
+    ],
+    mixOk: [],
+    mixBad: [],
+    caution: "芽胞形成菌のため抗生剤と同時服用OK。温かい飲み物も問題なし。"
+  },
+  {
+    id: "lactomin", name: "ラックビー微粒N", generic: "ビフィズス菌",
+    maker: "興和", type: "powder", category: ["stomach"],
+    tastes: ["plain"],
+    tasteDetail: "ほぼ無味。わずかに乳酸菌特有の香り。",
+    generics: [],
+    mixGood: [
+      { name: "牛乳", icon: "\u{1F95B}", note: "乳製品と好相性" },
+      { name: "ヨーグルト", icon: "\u{1F944}", note: "乳酸菌同士" },
+      { name: "アイスクリーム", icon: "\u{1F368}", note: "問題なし" }
+    ],
+    mixOk: [
+      { name: "ジュース", icon: "\u{1F9C3}", note: "問題なし" }
+    ],
+    mixBad: [],
+    caution: "抗生剤で死滅する（耐性なし）。抗生剤投与時はビオフェルミンRかミヤBMを。"
+  },
+  {
+    id: "magnesium_oxide", name: "酸化マグネシウム細粒", generic: "酸化マグネシウム",
+    maker: "各社", type: "powder", category: ["stomach"],
+    tastes: ["plain"],
+    tasteDetail: "ほぼ無味だがわずかに粉っぽい。ザラつきが気になる子もいる。",
+    generics: [
+      { name: "酸化マグネシウム細粒83%「ヨシダ」", maker: "吉田製薬", tasteNote: "各社ほぼ同じ" },
+      { name: "マグミット細粒83%", maker: "協和化学", tasteNote: "最も処方量が多い" }
+    ],
+    mixGood: [
+      { name: "ジュース", icon: "\u{1F9C3}", note: "粉っぽさが紛れる" },
+      { name: "ヨーグルト", icon: "\u{1F944}", note: "ザラつきが気にならない" }
+    ],
+    mixOk: [
+      { name: "牛乳", icon: "\u{1F95B}", note: "問題なし" },
+      { name: "お茶", icon: "\u{1F375}", note: "問題なし" }
+    ],
+    mixBad: [],
+    caution: "大量の牛乳との常用でミルクアルカリ症候群のリスク（通常量なら問題なし）。"
+  },
+  {
+    id: "mosapride", name: "ガスモチンDS", generic: "モサプリド",
+    maker: "大日本住友製薬", type: "powder", category: ["stomach"],
+    tastes: ["sweet"],
+    tasteDetail: "甘い味付け。比較的飲みやすい。",
+    generics: [
+      { name: "モサプリドDS0.75%「サワイ」", maker: "沢井製薬", tasteNote: "先発同等" }
+    ],
+    mixGood: [
+      { name: "アイスクリーム", icon: "\u{1F368}", note: "甘味で飲みやすい" },
+      { name: "ジュース", icon: "\u{1F9C3}", note: "味がなじむ" }
+    ],
+    mixOk: [
+      { name: "牛乳", icon: "\u{1F95B}", note: "問題なし" }
+    ],
+    mixBad: [],
+    caution: "消化管運動改善薬。食前服用。"
+  },
+
+  // ===== 追加: ステロイド =====
+  {
+    id: "prednisolone", name: "プレドニン散", generic: "プレドニゾロン",
+    maker: "塩野義製薬", type: "powder", category: ["asthma", "allergy"],
+    tastes: ["bitter"],
+    tasteDetail: "強い苦味。ステロイド特有の嫌な味。子どもが最も嫌がる薬の一つ。",
+    generics: [
+      { name: "プレドニゾロン散1%「旭化成」", maker: "旭化成ファーマ", tasteNote: "先発同等の苦味" }
+    ],
+    mixGood: [
+      { name: "チョコアイス", icon: "\u{1F36B}", note: "苦味マスクに最も有効" },
+      { name: "ココア", icon: "\u2615", note: "苦味をカバー" }
+    ],
+    mixOk: [
+      { name: "牛乳", icon: "\u{1F95B}", note: "やや苦さ残るが飲める" }
+    ],
+    mixBad: [
+      { name: "ヨーグルト", icon: "\u{1F944}", note: "酸味で苦味が際立つ" },
+      { name: "オレンジジュース", icon: "\u{1F34A}", note: "苦味が目立つ" },
+      { name: "お湯", icon: "\u{1F4A7}", note: "苦味がダイレクト" }
+    ],
+    caution: "クループ・喘息発作等に短期使用。少量の食べ物に混ぜて一口で飲ませる工夫を。"
+  },
+  // ===== 追加: 抗けいれん =====
+  {
+    id: "valproic_acid", name: "デパケン細粒", generic: "バルプロ酸ナトリウム",
+    maker: "協和キリン", type: "powder", category: ["neuro"],
+    tastes: ["sweet"],
+    tasteDetail: "甘い味付け。比較的飲みやすい。てんかん・熱性けいれん予防に。",
+    generics: [
+      { name: "バルプロ酸Na細粒20%「アメル」", maker: "共和薬品", tasteNote: "先発同等" }
+    ],
+    mixGood: [
+      { name: "アイスクリーム", icon: "\u{1F368}", note: "甘味で飲みやすい" },
+      { name: "ジュース", icon: "\u{1F9C3}", note: "味がなじむ" }
+    ],
+    mixOk: [
+      { name: "牛乳", icon: "\u{1F95B}", note: "問題なし" }
+    ],
+    mixBad: [
+      { name: "炭酸飲料", icon: "\u{1F964}", note: "溶出が変化する可能性" }
+    ],
+    caution: "血中濃度モニタリング必要。カルバペネム系抗生剤との併用禁忌。"
+  },
+  {
+    id: "carbamazepine", name: "テグレトール細粒", generic: "カルバマゼピン",
+    maker: "ノバルティスファーマ", type: "powder", category: ["neuro"],
+    tastes: ["bitter"],
+    tasteDetail: "苦味あり。粉っぽく飲みにくい。てんかんの第一選択薬の一つ。",
+    generics: [
+      { name: "カルバマゼピン細粒50%「アメル」", maker: "共和薬品", tasteNote: "先発同等の苦味" }
+    ],
+    mixGood: [
+      { name: "チョコアイス", icon: "\u{1F36B}", note: "苦味マスクに効果的" },
+      { name: "ココア", icon: "\u2615", note: "苦味をカバー" }
+    ],
+    mixOk: [
+      { name: "牛乳", icon: "\u{1F95B}", note: "やや苦さ残る" }
+    ],
+    mixBad: [
+      { name: "グレープフルーツ", icon: "\u{1F34A}", note: "代謝阻害で血中濃度上昇" }
+    ],
+    caution: "血中濃度モニタリング必要。SJS等の重篤な皮膚障害に注意。飲み始め2ヶ月が重要。"
+  },
+
+  // ===== 追加: その他散剤 =====
+  {
+    id: "procaterol", name: "メプチンDS", generic: "プロカテロール",
+    maker: "大塚製薬", type: "powder", category: ["asthma"],
+    tastes: ["sweet"],
+    tasteDetail: "甘い味付け。飲みやすい。即効性の気管支拡張薬。",
+    generics: [
+      { name: "プロカテロールDS0.005%「サワイ」", maker: "沢井製薬", tasteNote: "先発同等" }
+    ],
+    mixGood: [
+      { name: "アイスクリーム", icon: "\u{1F368}", note: "甘味で飲みやすい" },
+      { name: "ジュース", icon: "\u{1F9C3}", note: "味がなじむ" }
+    ],
+    mixOk: [
+      { name: "牛乳", icon: "\u{1F95B}", note: "問題なし" }
+    ],
+    mixBad: [],
+    caution: "手の震え・動悸が出ることがある。頓用指示の場合あり。"
+  },
+  {
+    id: "levetiracetam", name: "イーケプラDS", generic: "レベチラセタム",
+    maker: "ユーシービージャパン", type: "powder", category: ["neuro"],
+    tastes: ["bitter"],
+    tasteDetail: "苦味あり。新しい抗てんかん薬で相互作用が少ないのが利点。",
+    generics: [
+      { name: "レベチラセタムDS50%「サワイ」", maker: "沢井製薬", tasteNote: "先発同等の苦味" }
+    ],
+    mixGood: [
+      { name: "チョコアイス", icon: "\u{1F36B}", note: "苦味マスクに効果的" },
+      { name: "ココア", icon: "\u2615", note: "ビター同士でなじむ" }
+    ],
+    mixOk: [
+      { name: "牛乳", icon: "\u{1F95B}", note: "やや苦さ残る" },
+      { name: "ジュース", icon: "\u{1F9C3}", note: "やや苦さ残る" }
+    ],
+    mixBad: [],
+    caution: "易刺激性（イライラ）の副作用に注意。用量は体重あたりで調整。"
+  },
+
+  // ===== 追加: 漢方 =====
+  {
+    id: "hochuekkito", name: "補中益気湯", generic: "ホチュウエッキトウ",
+    maker: "ツムラ(41)", type: "kampo", category: ["stomach"],
+    tastes: ["sweet", "bitter"],
+    tasteDetail: "甘味と苦味が混在。独特だが漢方の中では比較的飲みやすい。元気がない子に。",
+    generics: [
+      { name: "クラシエ補中益気湯エキス細粒", maker: "クラシエ", tasteNote: "ツムラと同等" }
+    ],
+    mixGood: [
+      { name: "ココア", icon: "\u2615", note: "苦味をカバー" },
+      { name: "チョコアイス", icon: "\u{1F36B}", note: "飲みやすくなる" }
+    ],
+    mixOk: [
+      { name: "お湯", icon: "\u{1F4A7}", note: "標準的な飲み方" }
+    ],
+    mixBad: [],
+    caution: "虚弱体質の改善に。感冒後の体力回復にも使用。"
+  },
+  {
+    id: "rikkunshito", name: "六君子湯", generic: "リックンシトウ",
+    maker: "ツムラ(43)", type: "kampo", category: ["stomach"],
+    tastes: ["sweet", "bitter"],
+    tasteDetail: "やや甘苦い。食欲不振・胃もたれの漢方で小児にもよく使われる。",
+    generics: [
+      { name: "クラシエ六君子湯エキス細粒", maker: "クラシエ", tasteNote: "ツムラと同等" }
+    ],
+    mixGood: [
+      { name: "ココア", icon: "\u2615", note: "飲みやすくなる" },
+      { name: "チョコアイス", icon: "\u{1F36B}", note: "苦味カバー" }
+    ],
+    mixOk: [
+      { name: "お湯", icon: "\u{1F4A7}", note: "標準的" }
+    ],
+    mixBad: [],
+    caution: "食欲不振に。食前服用が基本。"
+  },
+  {
+    id: "shakuyakukanzoto", name: "芍薬甘草湯", generic: "シャクヤクカンゾウトウ",
+    maker: "ツムラ(68)", type: "kampo", category: ["stomach"],
+    tastes: ["sweet"],
+    tasteDetail: "甘草由来の甘味が強い。漢方の中では最も飲みやすい部類。即効性あり。",
+    generics: [
+      { name: "クラシエ芍薬甘草湯エキス細粒", maker: "クラシエ", tasteNote: "ツムラと同等の甘味" }
+    ],
+    mixGood: [
+      { name: "お湯", icon: "\u{1F4A7}", note: "甘いのでそのままでOK" },
+      { name: "ジュース", icon: "\u{1F9C3}", note: "味がなじむ" }
+    ],
+    mixOk: [
+      { name: "牛乳", icon: "\u{1F95B}", note: "問題なし" }
+    ],
+    mixBad: [],
+    caution: "筋けいれん・腹痛に頓用。甘草大量のため長期連用で偽アルドステロン症に注意。"
+  },
+  {
+    id: "keishito", name: "桂枝湯", generic: "ケイシトウ",
+    maker: "ツムラ(45)", type: "kampo", category: ["cold"],
+    tastes: ["sweet", "bitter"],
+    tasteDetail: "桂皮（シナモン）の風味で甘苦い。葛根湯より穏やかで虚弱な子向け。",
+    generics: [
+      { name: "クラシエ桂枝湯エキス細粒", maker: "クラシエ", tasteNote: "ツムラと同等" }
+    ],
+    mixGood: [
+      { name: "ココア", icon: "\u2615", note: "シナモン+ココアで飲みやすい" },
+      { name: "チョコアイス", icon: "\u{1F36B}", note: "相性良い" }
+    ],
+    mixOk: [
+      { name: "お湯", icon: "\u{1F4A7}", note: "標準的な飲み方" }
+    ],
+    mixBad: [],
+    caution: "葛根湯が強すぎる子に。汗をかきやすい虚弱タイプの風邪に。"
+  },
+  {
+    id: "shosaikoto", name: "小柴胡湯", generic: "ショウサイコトウ",
+    maker: "ツムラ(9)", type: "kampo", category: ["cold"],
+    tastes: ["bitter"],
+    tasteDetail: "苦味が目立つ。柴胡由来の独特の苦さ。長引く風邪に使われる。",
+    generics: [
+      { name: "クラシエ小柴胡湯エキス細粒", maker: "クラシエ", tasteNote: "ツムラと同等" }
+    ],
+    mixGood: [
+      { name: "チョコアイス", icon: "\u{1F36B}", note: "苦味マスクに最適" },
+      { name: "ココア", icon: "\u2615", note: "苦味をカバー" }
+    ],
+    mixOk: [],
+    mixBad: [
+      { name: "お湯のみ", icon: "\u{1F4A7}", note: "苦味がダイレクト" }
+    ],
+    caution: "間質性肺炎のリスクあり（稀）。インターフェロンとの併用禁忌。"
+  },
+  {
+    id: "shinbuto", name: "真武湯", generic: "シンブトウ",
+    maker: "ツムラ(30)", type: "kampo", category: ["stomach"],
+    tastes: ["bitter"],
+    tasteDetail: "やや苦味あり。附子を含む温める処方。冷えからくる下痢に。",
+    generics: [
+      { name: "クラシエ真武湯エキス細粒", maker: "クラシエ", tasteNote: "ツムラと同等" }
+    ],
+    mixGood: [
+      { name: "ココア", icon: "\u2615", note: "温かいココアと相性良い" },
+      { name: "チョコアイス", icon: "\u{1F36B}", note: "苦味カバー" }
+    ],
+    mixOk: [
+      { name: "お湯", icon: "\u{1F4A7}", note: "温める処方なので温服推奨" }
+    ],
+    mixBad: [],
+    caution: "附子含有。しびれ感が出たら減量。冷え性の下痢・腹痛に。"
+  },
+  {
+    id: "biothree", name: "ビオスリー配合散", generic: "糖化菌・乳酸菌・酪酸菌配合",
+    maker: "東亜薬品工業", type: "powder", category: ["stomach"],
+    tastes: ["plain"],
+    tasteDetail: "ほぼ無味でやや甘み。整腸剤で混ぜやすい。",
+    generics: [],
+    mixGood: [
+      { name: "ヨーグルト", icon: "\u{1F944}", note: "混ぜやすく服用しやすい" },
+      { name: "りんごジュース", icon: "\u{1F34E}", note: "少量で飲ませやすい" }
+    ],
+    mixOk: [
+      { name: "牛乳", icon: "\u{1F95B}", note: "大きな問題なし" }
+    ],
+    mixBad: [
+      { name: "熱い飲み物", icon: "\u{1FAD6}", note: "生菌製剤のため高温は避ける" }
+    ],
+    caution: "生菌製剤。熱湯や熱い飲み物への混和は避ける。"
+  },
+  {
+    id: "makyokansekito", name: "麻杏甘石湯", generic: "マキョウカンセキトウ",
+    maker: "ツムラ(55)", type: "kampo", category: ["cold", "asthma"],
+    tastes: ["bitter"],
+    tasteDetail: "漢方らしい苦味があり、後味はやや重め。咳や小児ぜんそくで使われることがある。",
+    generics: [
+      { name: "クラシエ麻杏甘石湯エキス細粒", maker: "クラシエ", tasteNote: "ツムラと大きくは変わらない" }
+    ],
+    mixGood: [
+      { name: "ココア", icon: "\u2615", note: "苦味を包みやすい" },
+      { name: "チョコアイス", icon: "\u{1F36B}", note: "冷たさと甘味で飲ませやすい" }
+    ],
+    mixOk: [
+      { name: "お湯", icon: "\u{1F4A7}", note: "標準的な飲み方" }
+    ],
+    mixBad: [],
+    caution: "麻黄含有。動悸や興奮、不眠傾向がある子では注意。"
+  },
+  {
+    id: "kikyoto", name: "桔梗湯", generic: "キキョウトウ",
+    maker: "ツムラ(138)", type: "kampo", category: ["cold"],
+    tastes: ["sweet", "bitter"],
+    tasteDetail: "甘草の甘みのあとに桔梗の苦味が続く。のど痛向けの漢方としては比較的服用しやすい。",
+    generics: [
+      { name: "クラシエ桔梗湯エキス細粒", maker: "クラシエ", tasteNote: "ツムラと近い味わい" }
+    ],
+    mixGood: [
+      { name: "はちみつ", icon: "\u{1F36F}", note: "のどあたりが良くなり甘味も補える" },
+      { name: "りんごジュース", icon: "\u{1F34E}", note: "少量で飲ませやすい" }
+    ],
+    mixOk: [
+      { name: "お湯", icon: "\u{1F4A7}", note: "標準的な飲み方" }
+    ],
+    mixBad: [],
+    caution: "扁桃炎やのどの腫れに使うことがある。甘草含有のため長期連用は注意。"
+  },
+  {
+    id: "keishikashakuyakudaiohto", name: "桂枝加芍薬大黄湯", generic: "ケイシカシャクヤクダイオウトウ",
+    maker: "ツムラ(134)", type: "kampo", category: ["stomach"],
+    tastes: ["bitter"],
+    tasteDetail: "大黄由来の苦味があり、漢方らしい後味が残る。腹部膨満感や便秘傾向で使われることがある。",
+    generics: [
+      { name: "クラシエ桂枝加芍薬大黄湯エキス細粒", maker: "クラシエ", tasteNote: "ツムラと大きくは変わらない" }
+    ],
+    mixGood: [
+      { name: "ココア", icon: "\u2615", note: "苦味を包みやすい" },
+      { name: "りんごジュース", icon: "\u{1F34E}", note: "酸味で飲ませやすい" }
+    ],
+    mixOk: [
+      { name: "お湯", icon: "\u{1F4A7}", note: "標準的な飲み方" }
+    ],
+    mixBad: [],
+    caution: "腹痛や便秘で用いられることがある。大黄含有のため下痢気味のときは注意。"
+  }
+];
+
+// ========== 香り情報を一括付与 ==========
+var flavorMap = {
+  amoxicillin: "イチゴ",
+  clarithromycin: "ストロベリー",
+  azithromycin: "フルーツミックス",
+  cefaclor: "オレンジ",
+  cefditoren: "バナナ",
+  cefcapene: "ストロベリー",
+  tosufloxacin: "無香料",
+  carbocisteine: "ピーチ",
+  ambroxol: "ストロベリー",
+  tipepidine: "オレンジ",
+  acetaminophen: "オレンジ",
+  tamiflu: "フルーツミックス",
+  domperidone: "無香料",
+  biofermin: "無香料",
+  ketotifen: "無香料",
+  montelukast: "無香料",
+  pranlukast: "ヨーグルト",
+  levocetirizine: "無香料",
+  tulobuterol: "パイン",
+  theophylline: "すもも",
+  syoseiryuto: "漢方特有",
+  bakumondoto: "漢方特有",
+  kakkonto: "生姜",
+  saireito: "漢方特有",
+  goreisan: "漢方特有",
+  daikentyuto: "山椒",
+  hangeshashinto: "漢方特有",
+  syoukenchuto: "漢方特有",
+  maoto: "杏仁",
+  yokukansankachimpihange: "漢方特有",
+  cefdinir: "ストロベリー",
+  cefpodoxime: "フルーツ",
+  cefteram: "イチゴ",
+  fosfomycin: "パイン",
+  ampc_cva: "ストロベリー",
+  cephalexin: "オレンジ",
+  erythromycin: "バニラ",
+  dextromethorphan: "無香料",
+  tranexamic: "無香料",
+  baloxavir: "無香料",
+  bromhexine: "無香料",
+  fexofenadine: "ストロベリー",
+  epinastine: "無香料",
+  loratadine: "ピーチ",
+  olopatadine: "無香料",
+  chlorpheniramine: "無香料",
+  cyproheptadine: "無香料",
+  miyabm: "無香料",
+  lactomin: "無香料",
+  magnesium_oxide: "無香料",
+  mosapride: "無香料",
+  prednisolone: "無香料",
+  valproic_acid: "無香料",
+  carbamazepine: "無香料",
+  procaterol: "無香料",
+  levetiracetam: "無香料",
+  hochuekkito: "漢方特有",
+  rikkunshito: "漢方特有",
+  shakuyakukanzoto: "漢方特有",
+  keishito: "桂皮（シナモン）",
+  shosaikoto: "漢方特有",
+  shinbuto: "漢方特有",
+  biothree: "無香料",
+  makyokansekito: "漢方特有",
+  kikyoto: "甘草",
+  keishikashakuyakudaiohto: "漢方特有"
+};
+function cloneMixList(items) {
+  return (items || []).map(function(item) {
+    return { name: item.name, icon: item.icon, note: item.note };
+  });
+}
+medicines.forEach(function(m) { m.flavor = flavorMap[m.id] || ""; });
+var baseMedicineData = {};
+medicines.forEach(function(m) {
+  baseMedicineData[m.id] = {
+    tastes: (m.tastes || []).slice(),
+    tasteDetail: m.tasteDetail || "",
+    flavor: m.flavor || "",
+    caution: m.caution || "",
+    mixGood: cloneMixList(m.mixGood),
+    mixOk: cloneMixList(m.mixOk),
+    mixBad: cloneMixList(m.mixBad)
+  };
+});
+
+var officialSourceMeta = {
+  publisher: "国立成育医療研究センター 薬剤部",
+  title: "粉薬と服薬補助食品の飲み合わせ",
+  year: "2018",
+  page: "PDF p.1-p.2",
+  url: "https://www.ncchd.go.jp/hospital/about/section/medicine/nomiawase.pdf"
+};
+var officialFoodCols = ["ココア", "プリン", "牛乳", "アイス", "お茶", "ヨーグルト", "りんごジュース", "オレンジ飲料", "乳酸菌飲料", "スポーツ飲料"];
+var listFilterOrder = ["kampo", "antibiotics", "cold", "stomach", "allergy", "asthma", "neuro"];
+var tableFilterOrder = ["kampo", "antibiotics", "cold", "stomach", "allergy", "asthma", "neuro"];
+var publicFilterLabels = {
+  all: "すべて",
+  kampo: "漢方",
+  antibiotics: "抗生剤",
+  cold: "かぜ薬",
+  stomach: "胃腸薬",
+  allergy: "抗アレルギー",
+  asthma: "気管支",
+  neuro: "けいれん"
+};
+var officialFoodIcons = {
+  "ココア": "\u2615",
+  "プリン": "\u{1F36E}",
+  "牛乳": "\u{1F95B}",
+  "アイス": "\u{1F368}",
+  "お茶": "\u{1F375}",
+  "ヨーグルト": "\u{1F944}",
+  "りんごジュース": "\u{1F34E}",
+  "オレンジ飲料": "\u{1F34A}",
+  "乳酸菌飲料": "\u{1F964}",
+  "スポーツ飲料": "\u{1F3C3}"
+};
+var officialSourceMap = {
+  erythromycin: { displayName: "エリスロシンドライシロップ", tasteLabel: "甘い", flavorLabel: "バニラ", compat: ["G","G","G","G","B","B","B","B","B","B"] },
+  ampc_cva: { displayName: "クラバモックスドライシロップ", tasteLabel: "甘い", flavorLabel: "ストロベリー", compat: ["N","G","B","G","G","G","B","G","N","N"] },
+  clarithromycin: { displayName: "クラリスドライシロップ", tasteLabel: "苦い", flavorLabel: "ストロベリー", compat: ["G","G","G","G","O","B","B","B","B","B"] },
+  azithromycin: { displayName: "ジスロマック細粒小児用", tasteLabel: "オレンジパイン", flavorLabel: "フルーツミックス", compat: ["G","G","G","G","B","B","B","B","B","B"] },
+  cefaclor: { displayName: "セファクロル細粒", tasteLabel: "甘い、やや苦い", flavorLabel: "オレンジ", compat: ["O","G","G","B","B","G","B","B","B","B"] },
+  cefdinir: { displayName: "セフゾン細粒", tasteLabel: "甘い", flavorLabel: "ストロベリー", compat: ["G","G","G","G","G","G","G","G","G","G"] },
+  tamiflu: { displayName: "タミフルドライシロップ", tasteLabel: "苦い", flavorLabel: "フルーツミックス", compat: ["G","B","B","B","B","G","B","G","B","G"] },
+  cefditoren: { displayName: "メイアクト細粒", tasteLabel: "やや苦い", flavorLabel: "バナナ", compat: ["G","B","G","G","G","O","B","G","B","B"] },
+  amoxicillin: { displayName: "ワイドシリン細粒", tasteLabel: "甘い", flavorLabel: "フルーツミックス", compat: ["O","O","G","G","G","G","G","G","G","G"] },
+  pranlukast: { displayName: "オノンドライシロップ", tasteLabel: "甘い", flavorLabel: "無香料", compat: ["G","G","G","G","G","G","G","G","G","G"] },
+  montelukast: { displayName: "シングレア細粒", tasteLabel: "わずかに甘い", flavorLabel: "無香料", compat: ["N","N","G","N","N","G","N","N","N","N"] },
+  cyproheptadine: { displayName: "ペリアクチン散", tasteLabel: "苦い", flavorLabel: "無香料", compat: ["G","G","O","O","B","B","B","B","G","B"] },
+  theophylline: { displayName: "テオドールドライシロップ", tasteLabel: "甘い", flavorLabel: "すもも", compat: ["G","G","O","G","B","G","O","O","G","O"] },
+  procaterol: { displayName: "メプチン顆粒", tasteLabel: "甘い", flavorLabel: "無香料", compat: ["O","G","O","G","O","O","O","O","G","O"] },
+  tipepidine: { displayName: "アスベリンドライシロップ", tasteLabel: "甘い", flavorLabel: "オレンジ", compat: ["B","G","B","O","O","O","O","O","G","O"] },
+  carbocisteine: { displayName: "ムコダインドライシロップ", tasteLabel: "甘酸っぱい", flavorLabel: "ピーチ", compat: ["B","B","G","G","B","G","G","G","O","G"] },
+  ambroxol: { displayName: "ムコサールドライシロップ", tasteLabel: "甘い", flavorLabel: "ヨーグルト", compat: ["G","B","G","G","O","G","B","B","O","B"] },
+  acetaminophen: { displayName: "カロナール細粒", tasteLabel: "甘い、後に苦い", flavorLabel: "オレンジ", compat: ["O","O","G","G","O","B","B","B","O","B"] }
+};
+
+var reviewMode = window.location.search.indexOf("review=1") !== -1 || window.location.hash === "#review";
+var memoStorageKey = "kusuri_memos_v1";
+var reviewRecordStorageKey = "kusuri_review_records_v1";
+var reviewAuditStorageKey = "kusuri_review_audit_v1";
+var reviewWorkflowLabels = {
+  internal_candidate: "未着手",
+  editing: "編集中",
+  review_ready: "確認待ち",
+  approved: "承認済",
+  published: "公開中",
+  rejected: "差し戻し"
+};
+var reviewDefaults = {
+  verified: false,
+  verifiedOn: "",
+  reviewer: "",
+  status: "pending",
+  workflowStatus: "internal_candidate",
+  scope: "",
+  sourceRefs: "",
+  note: "薬剤師レビュー待ち",
+  rejectionReason: "",
+  updatedBy: "",
+  updatedAt: "",
+  publishedOn: "",
+  version: 1,
+  subjectiveTastePrimary: "",
+  subjectiveTasteSecondary: "",
+  subjectiveTasteAftertaste: "",
+  subjectiveTasteTags: [],
+  subjectiveTasteDetail: "",
+  subjectiveFlavorPrimary: "",
+  subjectiveFlavorSecondary: "",
+  subjectiveFlavorDetail: "",
+  subjectiveFlavor: "",
+  subjectiveCaution: "",
+  subjectiveCompat: []
+};
+var reviewOverrides = {
+  // 正式監修が完了した薬から個別に上書きする
+};
+var storedReviewRecords = getStoredReviewRecords();
+var storedReviewAuditMap = getStoredReviewAuditMap();
+var selectedReviewId = "";
+var reviewEditorMessage = "";
+
+// ========== ユーティリティ ==========
+const tasteLabels = {
+  bitter: "苦い", sweet: "甘い", sour: "酸っぱい", plain: "無味",
+  astringent: "渋い", numbing: "痺れ", cool: "清涼感", aromatic: "芳香"
+};
+const tasteCss = {
+  bitter: "taste-bitter", sweet: "taste-sweet", sour: "taste-sour",
+  plain: "taste-plain", astringent: "taste-astringent", numbing: "taste-numbing",
+  cool: "taste-cool", aromatic: "taste-aromatic"
+};
+const normalizedTasteKeys = Object.keys(tasteLabels);
+const normalizedFlavorLabels = {
+  none: "無香料",
+  strawberry: "ストロベリー",
+  vanilla: "バニラ",
+  orange: "オレンジ",
+  banana: "バナナ",
+  peach: "ピーチ",
+  plum: "すもも",
+  yogurt: "ヨーグルト",
+  fruit: "フルーツ",
+  pine: "パイン",
+  cinnamon: "シナモン",
+  licorice: "甘草",
+  kampo: "漢方特有",
+  other: "その他"
+};
+const normalizedFlavorKeys = Object.keys(normalizedFlavorLabels);
+
+function getFavs() {
+  try { return JSON.parse(localStorage.getItem("kusuri_favs") || "[]"); } catch { return []; }
+}
+function setFavs(arr) { localStorage.setItem("kusuri_favs", JSON.stringify(arr)); }
+function isFav(id) { return getFavs().includes(id); }
+function getFavIcon(isActive) { return isActive ? "\u2665" : "\u2661"; }
+function getMemos() {
+  return readLocalJson(memoStorageKey, {});
+}
+function getMemo(id) {
+  return String(getMemos()[id] || "");
+}
+function setMemo(id, value) {
+  var next = getMemos();
+  if (String(value || "").trim()) next[id] = value;
+  else delete next[id];
+  writeLocalJson(memoStorageKey, next);
+}
+function readLocalJson(key, fallback) {
+  try {
+    var raw = localStorage.getItem(key);
+    return raw ? JSON.parse(raw) : fallback;
+  } catch (err) {
+    return fallback;
+  }
+}
+function writeLocalJson(key, value) {
+  try {
+    localStorage.setItem(key, JSON.stringify(value));
+  } catch (err) {
+    // localStorage unavailable or full
+  }
+}
+function getStoredReviewRecords() {
+  return readLocalJson(reviewRecordStorageKey, {});
+}
+function getStoredReviewAuditMap() {
+  return readLocalJson(reviewAuditStorageKey, {});
+}
+function clonePlainObject(value) {
+  return JSON.parse(JSON.stringify(value || {}));
+}
+function getTodayIsoDate() {
+  var now = new Date();
+  var shifted = new Date(now.getTime() - now.getTimezoneOffset() * 60000);
+  return shifted.toISOString().slice(0, 10);
+}
+function getNowTimestamp() {
+  return new Date().toISOString();
+}
+function normalizeTasteKey(value) {
+  return normalizedTasteKeys.indexOf(value) !== -1 ? value : "";
+}
+function buildTasteTagsFromNormalizedFields(primary, secondary, aftertaste) {
+  var tags = [];
+  [primary, secondary, aftertaste].forEach(function(key) {
+    var normalizedKey = normalizeTasteKey(key);
+    if (normalizedKey && tags.indexOf(normalizedKey) === -1) tags.push(normalizedKey);
+  });
+  return tags;
+}
+function normalizeFlavorKey(value) {
+  return normalizedFlavorKeys.indexOf(value) !== -1 ? value : "";
+}
+function extractFlavorKeysFromText(text) {
+  var source = String(text || "");
+  var matches = [];
+  var patterns = [
+    { key: "none", pattern: /無香料/ },
+    { key: "strawberry", pattern: /ストロベリー/ },
+    { key: "vanilla", pattern: /バニラ/ },
+    { key: "orange", pattern: /オレンジ/ },
+    { key: "banana", pattern: /バナナ/ },
+    { key: "peach", pattern: /ピーチ/ },
+    { key: "plum", pattern: /すもも/ },
+    { key: "yogurt", pattern: /ヨーグルト/ },
+    { key: "fruit", pattern: /フルーツ/ },
+    { key: "pine", pattern: /パイン/ },
+    { key: "cinnamon", pattern: /シナモン|桂皮/ },
+    { key: "licorice", pattern: /甘草/ },
+    { key: "kampo", pattern: /漢方特有/ }
+  ];
+  patterns.forEach(function(item) {
+    if (item.pattern.test(source) && matches.indexOf(item.key) === -1) matches.push(item.key);
+  });
+  return matches;
+}
+function buildFlavorLabelFromNormalizedFields(primary, secondary, detail) {
+  var labels = [];
+  [primary, secondary].forEach(function(key) {
+    var normalizedKey = normalizeFlavorKey(key);
+    if (!normalizedKey || normalizedKey === "other") return;
+    var label = normalizedFlavorLabels[normalizedKey];
+    if (label && labels.indexOf(label) === -1) labels.push(label);
+  });
+  var detailText = String(detail || "").trim();
+  if (primary === "other" || secondary === "other") {
+    return detailText || "その他";
+  }
+  if (!labels.length) return detailText;
+  if (detailText) return labels.join("、") + "（" + detailText + "）";
+  return labels.join("、");
+}
+function buildCompatCodesFromMixLists(mixGood, mixOk, mixBad) {
+  var result = {};
+  officialFoodCols.forEach(function(name) { result[name] = "N"; });
+  (mixBad || []).forEach(function(item) {
+    mapFoodName(item.name).forEach(function(col) {
+      if (result[col] === "N") result[col] = "B";
+    });
+  });
+  (mixOk || []).forEach(function(item) {
+    mapFoodName(item.name).forEach(function(col) {
+      result[col] = "O";
+    });
+  });
+  (mixGood || []).forEach(function(item) {
+    mapFoodName(item.name).forEach(function(col) {
+      result[col] = "G";
+    });
+  });
+  return officialFoodCols.map(function(name) { return result[name] || "N"; });
+}
+function normalizeCompatCodes(codes, fallbackCodes) {
+  var source = Array.isArray(codes) && codes.length ? codes : (fallbackCodes || []);
+  return officialFoodCols.map(function(name, index) {
+    var code = source[index];
+    return code === "G" || code === "O" || code === "B" ? code : "N";
+  });
+}
+function buildMixListsFromCompatCodes(codes) {
+  var normalizedCodes = normalizeCompatCodes(codes, []);
+  var entries = { good: [], ok: [], bad: [] };
+  normalizedCodes.forEach(function(code, index) {
+    if (code === "N") return;
+    var name = officialFoodCols[index];
+    var item = {
+      name: name,
+      icon: officialFoodIcons[name] || "\u2022",
+      note: code === "G" ? "監修入力: 飲みやすい" : code === "O" ? "監修入力: 変わらない" : "監修入力: 飲みにくい"
+    };
+    if (code === "G") entries.good.push(item);
+    else if (code === "O") entries.ok.push(item);
+    else entries.bad.push(item);
+  });
+  return entries;
+}
+function getCompatSummaryLabel(codes) {
+  return normalizeCompatCodes(codes, []).map(function(code, index) {
+    if (code === "N") return "";
+    return officialFoodCols[index] + ":" + (code === "G" ? "飲みやすい" : code === "O" ? "変わらない" : "飲みにくい");
+  }).filter(Boolean).join(" / ");
+}
+function normalizeReviewRecord(review, isOfficial) {
+  var sourceReview = review || {};
+  var normalized = Object.assign({}, reviewDefaults, sourceReview);
+  var base = baseMedicineData[normalized.idHint] || baseMedicineData[normalized.recordId] || null;
+  delete normalized.idHint;
+  delete normalized.recordId;
+  if (!normalized.workflowStatus) {
+    if (normalized.status === "needs_revision") normalized.workflowStatus = "rejected";
+    else if (normalized.status === "verified" && normalized.verified && normalized.verifiedOn) normalized.workflowStatus = "published";
+    else normalized.workflowStatus = "internal_candidate";
+  }
+  normalized.version = Math.max(1, parseInt(normalized.version, 10) || 1);
+  if (isOfficial) {
+    normalized.workflowStatus = "published";
+    normalized.verified = true;
+    normalized.status = "official";
+    normalized.verifiedOn = normalized.verifiedOn || officialSourceMeta.year;
+    normalized.scope = "NCCHD公開資料の掲載内容を構造化";
+    normalized.sourceRefs = officialSourceMeta.url;
+    normalized.note = officialSourceMeta.publisher + " " + officialSourceMeta.year;
+    normalized.rejectionReason = "";
+    normalized.publishedOn = officialSourceMeta.year;
+    return normalized;
+  }
+  if (base) {
+    var baseCompat = buildCompatCodesFromMixLists(base.mixGood, base.mixOk, base.mixBad);
+    var sourceTags = Array.isArray(sourceReview.subjectiveTasteTags)
+      ? sourceReview.subjectiveTasteTags.map(normalizeTasteKey).filter(Boolean)
+      : base.tastes.map(normalizeTasteKey).filter(Boolean);
+    normalized.subjectiveTastePrimary = Object.prototype.hasOwnProperty.call(sourceReview, "subjectiveTastePrimary")
+      ? normalizeTasteKey(normalized.subjectiveTastePrimary)
+      : (sourceTags[0] || "");
+    normalized.subjectiveTasteSecondary = Object.prototype.hasOwnProperty.call(sourceReview, "subjectiveTasteSecondary")
+      ? normalizeTasteKey(normalized.subjectiveTasteSecondary)
+      : (sourceTags[1] || "");
+    normalized.subjectiveTasteAftertaste = Object.prototype.hasOwnProperty.call(sourceReview, "subjectiveTasteAftertaste")
+      ? normalizeTasteKey(normalized.subjectiveTasteAftertaste)
+      : (sourceTags[2] || "");
+    normalized.subjectiveTasteTags = buildTasteTagsFromNormalizedFields(
+      normalized.subjectiveTastePrimary,
+      normalized.subjectiveTasteSecondary,
+      normalized.subjectiveTasteAftertaste
+    );
+    if (!Object.prototype.hasOwnProperty.call(sourceReview, "subjectiveTasteDetail")) normalized.subjectiveTasteDetail = base.tasteDetail;
+    var sourceFlavorText = Object.prototype.hasOwnProperty.call(sourceReview, "subjectiveFlavor")
+      ? sourceReview.subjectiveFlavor
+      : base.flavor;
+    var sourceFlavorKeys = extractFlavorKeysFromText(sourceFlavorText);
+    normalized.subjectiveFlavorPrimary = Object.prototype.hasOwnProperty.call(sourceReview, "subjectiveFlavorPrimary")
+      ? normalizeFlavorKey(normalized.subjectiveFlavorPrimary)
+      : (sourceFlavorKeys[0] || (sourceFlavorText ? "other" : ""));
+    normalized.subjectiveFlavorSecondary = Object.prototype.hasOwnProperty.call(sourceReview, "subjectiveFlavorSecondary")
+      ? normalizeFlavorKey(normalized.subjectiveFlavorSecondary)
+      : (sourceFlavorKeys[1] || "");
+    normalized.subjectiveFlavorDetail = Object.prototype.hasOwnProperty.call(sourceReview, "subjectiveFlavorDetail")
+      ? normalized.subjectiveFlavorDetail
+      : (!sourceFlavorKeys.length && sourceFlavorText ? sourceFlavorText : "");
+    normalized.subjectiveFlavor = buildFlavorLabelFromNormalizedFields(
+      normalized.subjectiveFlavorPrimary,
+      normalized.subjectiveFlavorSecondary,
+      normalized.subjectiveFlavorDetail
+    ) || sourceFlavorText || "";
+    if (!Object.prototype.hasOwnProperty.call(sourceReview, "subjectiveCaution")) normalized.subjectiveCaution = base.caution;
+    normalized.subjectiveCompat = Object.prototype.hasOwnProperty.call(sourceReview, "subjectiveCompat")
+      ? normalizeCompatCodes(normalized.subjectiveCompat, baseCompat)
+      : baseCompat;
+  } else {
+    var looseTags = Array.isArray(normalized.subjectiveTasteTags)
+      ? normalized.subjectiveTasteTags.map(normalizeTasteKey).filter(Boolean)
+      : [];
+    normalized.subjectiveTastePrimary = normalizeTasteKey(normalized.subjectiveTastePrimary) || looseTags[0] || "";
+    normalized.subjectiveTasteSecondary = normalizeTasteKey(normalized.subjectiveTasteSecondary) || looseTags[1] || "";
+    normalized.subjectiveTasteAftertaste = normalizeTasteKey(normalized.subjectiveTasteAftertaste) || looseTags[2] || "";
+    normalized.subjectiveTasteTags = buildTasteTagsFromNormalizedFields(
+      normalized.subjectiveTastePrimary,
+      normalized.subjectiveTasteSecondary,
+      normalized.subjectiveTasteAftertaste
+    );
+    var looseFlavorText = String(normalized.subjectiveFlavor || "");
+    var looseFlavorKeys = extractFlavorKeysFromText(looseFlavorText);
+    normalized.subjectiveFlavorPrimary = normalizeFlavorKey(normalized.subjectiveFlavorPrimary) || looseFlavorKeys[0] || (looseFlavorText ? "other" : "");
+    normalized.subjectiveFlavorSecondary = normalizeFlavorKey(normalized.subjectiveFlavorSecondary) || looseFlavorKeys[1] || "";
+    normalized.subjectiveFlavorDetail = normalized.subjectiveFlavorDetail || (!looseFlavorKeys.length && looseFlavorText ? looseFlavorText : "");
+    normalized.subjectiveFlavor = buildFlavorLabelFromNormalizedFields(
+      normalized.subjectiveFlavorPrimary,
+      normalized.subjectiveFlavorSecondary,
+      normalized.subjectiveFlavorDetail
+    ) || looseFlavorText;
+    normalized.subjectiveCompat = normalizeCompatCodes(normalized.subjectiveCompat, []);
+  }
+  if (normalized.workflowStatus === "approved" || normalized.workflowStatus === "published") {
+    normalized.verified = true;
+    normalized.status = "verified";
+  } else if (normalized.workflowStatus === "rejected") {
+    normalized.verified = false;
+    normalized.status = "needs_revision";
+  } else {
+    normalized.verified = false;
+    normalized.status = "pending";
+  }
+  if (!normalized.note) {
+    normalized.note = normalized.workflowStatus === "rejected" ? "差し戻し" : "薬剤師レビュー待ち";
+  }
+  if (normalized.workflowStatus !== "published") {
+    normalized.publishedOn = "";
+  }
+  return normalized;
+}
+function syncMedicineReviews() {
+  medicines.forEach(function(m) {
+    m.official = officialSourceMap[m.id] || null;
+    var storedRecord = m.official ? {} : (storedReviewRecords[m.id] || {});
+    var merged = Object.assign({}, reviewDefaults, reviewOverrides[m.id] || {}, storedRecord, { idHint: m.id });
+    m.review = normalizeReviewRecord(merged, !!m.official);
+    if (!m.official) {
+      var subjectiveMix = buildMixListsFromCompatCodes(m.review.subjectiveCompat);
+      m.tastes = m.review.subjectiveTasteTags.slice();
+      m.tasteDetail = m.review.subjectiveTasteDetail;
+      m.flavor = m.review.subjectiveFlavor;
+      m.caution = m.review.subjectiveCaution;
+      m.mixGood = subjectiveMix.good;
+      m.mixOk = subjectiveMix.ok;
+      m.mixBad = subjectiveMix.bad;
+    }
+  });
+}
+function persistReviewRecord(medId, review) {
+  storedReviewRecords[medId] = clonePlainObject(review);
+  writeLocalJson(reviewRecordStorageKey, storedReviewRecords);
+  syncMedicineReviews();
+}
+function getReviewAuditEntries(medId) {
+  return storedReviewAuditMap[medId] || [];
+}
+function appendReviewAudit(medId, entry) {
+  var entries = getReviewAuditEntries(medId).slice();
+  entries.unshift(entry);
+  storedReviewAuditMap[medId] = entries.slice(0, 24);
+  writeLocalJson(reviewAuditStorageKey, storedReviewAuditMap);
+}
+function getWorkflowStatusClass(workflowStatus, isOfficial) {
+  if (isOfficial || workflowStatus === "published") return "verified";
+  if (workflowStatus === "approved") return "approved";
+  if (workflowStatus === "rejected") return "needs_revision";
+  return "pending";
+}
+function getWorkflowSortRank(med) {
+  if (med.official) return 90;
+  var ranks = {
+    review_ready: 0,
+    approved: 1,
+    rejected: 2,
+    editing: 3,
+    internal_candidate: 4,
+    published: 5
+  };
+  return ranks[med.review.workflowStatus] != null ? ranks[med.review.workflowStatus] : 99;
+}
+function compareReviewRows(a, b) {
+  if (a.layer !== b.layer) {
+    var layerRank = { internal: 0, reviewed: 1, official: 2 };
+    return layerRank[a.layer] - layerRank[b.layer];
+  }
+  if (a.sortRank !== b.sortRank) return a.sortRank - b.sortRank;
+  return a.name.localeCompare(b.name, "ja");
+}
+function isReviewedExtension(med) {
+  return !!(!med.official && med.review && med.review.workflowStatus === "published" && med.review.verified && med.review.verifiedOn);
+}
+function getOfficialMedicines() {
+  return medicines.filter(function(m) { return !!m.official; });
+}
+function getReviewedExtensions() {
+  return medicines.filter(isReviewedExtension);
+}
+function getInternalCandidates() {
+  return medicines.filter(function(m) { return !m.official && !isReviewedExtension(m); });
+}
+function isPublicMed(med) {
+  return !!med.official || isReviewedExtension(med);
+}
+function getPublicMedicines() {
+  return getOfficialMedicines().concat(getReviewedExtensions());
+}
+function getReviewStats() {
+  var officialSource = getOfficialMedicines().length;
+  var publishedMeds = getReviewedExtensions();
+  var reviewed = publishedMeds.length;
+  var reviewReady = 0;
+  var approved = 0;
+  var editing = 0;
+  var rejected = 0;
+  var latestVerifiedOn = "";
+  medicines.forEach(function(m) {
+    if (!m.official && (m.review.workflowStatus === "approved" || m.review.workflowStatus === "published") && m.review.verifiedOn) {
+      if (!latestVerifiedOn || m.review.verifiedOn > latestVerifiedOn) latestVerifiedOn = m.review.verifiedOn;
+    }
+  });
+  medicines.forEach(function(m) {
+    if (m.official) return;
+    if (m.review.workflowStatus === "review_ready") reviewReady += 1;
+    else if (m.review.workflowStatus === "approved") approved += 1;
+    else if (m.review.workflowStatus === "rejected") rejected += 1;
+    else if (m.review.workflowStatus !== "published") editing += 1;
+  });
+  publishedMeds.forEach(function(m) {
+    if (!latestVerifiedOn || m.review.verifiedOn > latestVerifiedOn) latestVerifiedOn = m.review.verifiedOn;
+  });
+  return {
+    total: medicines.length,
+    officialSource: officialSource,
+    reviewed: reviewed,
+    publicTotal: officialSource + reviewed,
+    reviewReady: reviewReady,
+    approved: approved,
+    editing: editing,
+    rejected: rejected,
+    hidden: medicines.length - officialSource - reviewed,
+    latestVerifiedOn: latestVerifiedOn
+  };
+}
+function formatReviewDate(dateText) {
+  return dateText ? dateText.replace(/-/g, ".") : "";
+}
+function getReviewStatusLabel(med) {
+  if (med.official) return "公的資料掲載";
+  return reviewWorkflowLabels[med.review.workflowStatus] || "未着手";
+}
+function getReviewStatusClass(med) {
+  return getWorkflowStatusClass(med.review.workflowStatus, !!med.official);
+}
+function getDisplayName(med) {
+  return med.official && med.official.displayName ? med.official.displayName : med.name;
+}
+function getDisplayTasteLabel(med) {
+  if (med.official && med.official.tasteLabel) return med.official.tasteLabel;
+  return med.tastes.map(function(t) { return tasteLabels[t]; }).join("\u3001");
+}
+function getDisplayFlavorLabel(med) {
+  if (med.official && med.official.flavorLabel) return med.official.flavorLabel;
+  return med.flavor || "";
+}
+function getSourceMeta(med) {
+  if (med.official) {
+    return {
+      badge: "公的資料掲載",
+      label: officialSourceMeta.publisher + " " + officialSourceMeta.year,
+      detail: officialSourceMeta.title + " / " + officialSourceMeta.page,
+      url: officialSourceMeta.url
+    };
+  }
+  if (isReviewedExtension(med)) {
+    return {
+      badge: "監修済み追加",
+      label: med.review.reviewer || "薬剤師確認済み",
+      detail: med.review.verifiedOn || "",
+      url: ""
+    };
+  }
+  return null;
+}
+function getMakerLabel(med) {
+  return med.maker.indexOf("ツムラ(") === 0 ? "ツムラ" : med.maker;
+}
+function getKampoNumber(med) {
+  var matched = med.maker.match(/\((\d+)\)/);
+  return matched ? matched[1] : "";
+}
+function updateStickyMetrics() {
+  var header = document.querySelector(".header");
+  var searchArea = document.querySelector("#page-list .search-area");
+  var headerHeight = header ? Math.ceil(header.getBoundingClientRect().height) : 56;
+  var searchHeight = searchArea ? Math.ceil(searchArea.getBoundingClientRect().height) : 56;
+  document.documentElement.style.setProperty("--header-height", headerHeight + "px");
+  document.documentElement.style.setProperty("--list-sticky-height", (headerHeight + searchHeight) + "px");
+  syncCompatStickyHead();
+}
+function syncCompatStickyHead() {
+  var wrap = document.getElementById("tableScrollWrap");
+  var stickyHead = document.getElementById("compatStickyHead");
+  var table = document.getElementById("compatTable");
+  if (!wrap || !stickyHead || !table) return;
+  var stickyTable = stickyHead.querySelector(".compat-table");
+  if (!stickyTable) return;
+  var sourceHead = table.tHead;
+  var sourceRow = sourceHead && sourceHead.rows ? sourceHead.rows[0] : null;
+  var stickyRow = stickyTable.tHead && stickyTable.tHead.rows ? stickyTable.tHead.rows[0] : null;
+  var sourceCells = sourceRow ? Array.prototype.slice.call(sourceRow.cells) : [];
+  var stickyCells = stickyRow ? Array.prototype.slice.call(stickyRow.cells) : [];
+  var totalWidth = 0;
+  sourceCells.forEach(function(cell, idx) {
+    var width = cell.getBoundingClientRect().width;
+    totalWidth += width;
+    if (stickyCells[idx]) {
+      var widthValue = width.toFixed(3) + "px";
+      stickyCells[idx].style.width = widthValue;
+      stickyCells[idx].style.minWidth = widthValue;
+      stickyCells[idx].style.maxWidth = widthValue;
+    }
+  });
+  if (sourceCells[0]) {
+    document.documentElement.style.setProperty("--compat-cat-width", sourceCells[0].getBoundingClientRect().width.toFixed(3) + "px");
+  }
+  var headHeight = sourceHead ? Math.ceil(sourceHead.getBoundingClientRect().height) : 0;
+  document.documentElement.style.setProperty("--compat-head-height", headHeight + "px");
+  stickyTable.style.width = Math.max(totalWidth, table.scrollWidth).toFixed(3) + "px";
+  stickyHead.scrollLeft = wrap.scrollLeft;
+}
+function toggleFav(id) {
+  let favs = getFavs();
+  if (favs.includes(id)) favs = favs.filter(f => f !== id);
+  else favs.push(id);
+  setFavs(favs);
+  return favs.includes(id);
+}
+function updatePublicReviewNotes() {
+  var stats = getReviewStats();
+  var publicMessage = "<strong>公開ルール:</strong> 国立成育医療研究センター公開資料の掲載薬だけを表示しています。";
+  var publicNote = document.getElementById("publicReviewNote");
+  var tableNote = document.getElementById("tableReviewNote");
+  if (publicNote) publicNote.innerHTML = publicMessage;
+  if (tableNote) tableNote.innerHTML = publicMessage;
+
+  var favs = getFavs();
+  var hiddenFavCount = favs.filter(function(id) {
+    var med = medicines.find(function(item) { return item.id === id; });
+    return med && !isPublicMed(med);
+  }).length;
+  var memoIds = Object.keys(getMemos());
+  var hiddenMemoCount = memoIds.filter(function(id) {
+    var med = medicines.find(function(item) { return item.id === id; });
+    return med && !isPublicMed(med);
+  }).length;
+  var savedNote = document.getElementById("savedReviewNote");
+  if (savedNote) {
+    savedNote.innerHTML = "<strong>保存済み表示:</strong> 公開対象の薬だけを表示します。" +
+      (hiddenFavCount ? " 未掲載・未確認のため非表示になっているお気に入りが " + hiddenFavCount + " 件あります。" : "") +
+      (hiddenMemoCount ? " 未掲載・未確認のため非表示になっているメモが " + hiddenMemoCount + " 件あります。" : "");
+  }
+}
+function getPublicFilterKeys(orderKeys) {
+  var meds = getPublicMedicines();
+  var keys = ["all"];
+  var present = {};
+  meds.forEach(function(m) {
+    present[m.type] = true;
+    m.category.forEach(function(cat) { present[cat] = true; });
+  });
+  (orderKeys || []).forEach(function(key) {
+    if (present[key]) keys.push(key);
+  });
+  return keys;
+}
+function renderFilterTabs(containerId, dataAttr, currentValue, orderKeys) {
+  var keys = getPublicFilterKeys(orderKeys);
+  if (keys.indexOf(currentValue) === -1) currentValue = "all";
+  var container = document.getElementById(containerId);
+  var html = "";
+  keys.forEach(function(key) {
+    html += '<div class="filter-tab ' + (currentValue === key ? 'active' : '') + '" data-' + dataAttr + '="' + key + '">' + publicFilterLabels[key] + '</div>';
+  });
+  container.innerHTML = html;
+  return currentValue;
+}
+
+function buildPublicCountText(visibleCount, totalCount) {
+  if (visibleCount === totalCount) return "公開母数 " + totalCount + "件";
+  return "表示 " + visibleCount + "件 / 公開母数 " + totalCount + "件";
+}
+
+// ========== レンダリング ==========
+function renderCardTasteBadges(med) {
+  let h = "";
+  if (med.type === "kampo") {
+    h += '<span class="type-badge type-kampo">漢方</span>';
+  }
+  med.tastes.forEach(function(t) {
+    h += '<span class="taste-badge ' + tasteCss[t] + '">' + tasteLabels[t] + '</span>';
+  });
+  return h;
+}
+
+function getCompatEntries(med) {
+  if (med.official) {
+    var entries = { good: [], ok: [], bad: [], none: [] };
+    officialFoodCols.forEach(function(name, index) {
+      var code = med.official.compat[index];
+      var item = {
+        name: name,
+        icon: officialFoodIcons[name] || "\u2022",
+        note: code === "G" ? "資料上: 飲みやすい" : code === "O" ? "資料上: 変わらない" : code === "B" ? "資料上: 飲みにくい" : "資料上: データなし"
+      };
+      if (code === "G") entries.good.push(item);
+      else if (code === "O") entries.ok.push(item);
+      else if (code === "B") entries.bad.push(item);
+      else entries.none.push(item);
+    });
+    return entries;
+  }
+  return { good: med.mixGood, ok: med.mixOk, bad: med.mixBad, none: [] };
+}
+
+function renderCompatSummary(med) {
+  var compatEntries = getCompatEntries(med);
+  var bestItems = compatEntries.good.slice(0, 3);
+  var badItems = compatEntries.bad.slice(0, 2);
+  var h = '<div class="card-summary">';
+  h += '<span class="summary-label">飲みやすい</span>';
+  if (bestItems.length) {
+    bestItems.forEach(function(item) {
+      h += '<span class="summary-pick"><span class="summary-pick-icon">' + item.icon + '</span>' + item.name + '</span>';
+    });
+  } else if (compatEntries.ok.length) {
+    h += '<div class="summary-note"><strong>資料上:</strong> ' + compatEntries.ok[0].name + ' は大きな変化なし</div>';
+  } else {
+    h += '<div class="summary-note"><strong>資料上:</strong> 飲みやすい組み合わせの記載はありません</div>';
+  }
+  if (badItems.length) {
+    h += '<span class="summary-break" aria-hidden="true"></span>';
+    h += '<span class="summary-label-bad">\u26A0 NG</span>';
+    badItems.forEach(function(item) {
+      h += '<span class="summary-pick-bad"><span class="summary-pick-icon">' + item.icon + '</span>' + item.name + '</span>';
+    });
+  }
+  h += '</div>';
+  return h;
+}
+
+function renderSourceBadge(med) {
+  var source = getSourceMeta(med);
+  if (!source) return "";
+  if (med.official) return '<div class="source-badge">' + source.badge + '</div>';
+  return '<div class="review-badge">監修済 ' + formatReviewDate(med.review.verifiedOn) + '</div>';
+}
+
+function renderTasteSection(med) {
+  let h = '<div class="detail-section">';
+  h += '<div class="detail-label">\u{1F445} 味・香り</div>';
+  if (med.official) {
+    h += '<div class="detail-text"><span style="font-size:11px;color:var(--primary);font-weight:600;">味:</span> ' + getDisplayTasteLabel(med) + '</div>';
+    h += '<div class="detail-text" style="margin-top:4px;"><span style="font-size:11px;color:var(--primary);font-weight:600;">香り:</span> ' + getDisplayFlavorLabel(med) + '</div>';
+  } else {
+    h += '<div class="detail-text"><span style="font-size:11px;color:var(--primary);font-weight:600;">味:</span> ' + (getDisplayTasteLabel(med) || "未設定") + '</div>';
+    if (med.tasteDetail) {
+      h += '<div class="detail-text" style="margin-top:4px;">' + med.tasteDetail + '</div>';
+    }
+    if (med.flavor) {
+      h += '<div class="detail-text" style="margin-top:4px;"><span style="font-size:11px;color:var(--primary);font-weight:600;">香り:</span> ' + med.flavor + '</div>';
+    }
+  }
+  h += '</div>';
+  return h;
+}
+
+function renderGenericSection(med) {
+  if (med.official) return "";
+  if (!med.generics || !med.generics.length) return "";
+  let h = '<div class="detail-section">';
+  h += '<div class="detail-label">\u{1F48A} ジェネリック医薬品</div>';
+  h += '<div class="generic-list">';
+  med.generics.forEach(function(g) {
+    h += '<div class="generic-item">';
+    h += '<div class="mix-info"><span class="gi-name">' + g.name + '</span><div class="gi-maker">' + g.maker + '</div>';
+    if (g.tasteNote) h += '<div class="gi-taste-note">' + g.tasteNote + '</div>';
+    h += '</div><span class="gi-badge">GE</span></div>';
+  });
+  h += '</div></div>';
+  return h;
+}
+
+function renderMixItem(item, level, symbol) {
+  return '<div class="mix-item compat-' + level + '"><span class="mix-icon">' + item.icon + '</span><div class="mix-info"><span class="mix-name">' + item.name + '</span><div class="mix-note">' + item.note + '</div></div><span class="compat-label ' + level + '">' + symbol + '</span></div>';
+}
+
+function renderMixSection(med) {
+  var compatEntries = getCompatEntries(med);
+  if (!compatEntries.good.length && !compatEntries.ok.length && !compatEntries.bad.length && !compatEntries.none.length) return "";
+  let h = '<div class="detail-section">';
+  h += '<div class="detail-label detail-label-inline"><span>\u{1F944} 資料上の相性</span><span class="detail-inline-legend"><span><span class="tl-good">\u25CF</span> 飲みやすい</span><span><span class="tl-ok">\u25B2</span> 変わらない</span><span><span class="tl-bad">\u00D7</span> 飲みにくい</span></span></div>';
+  h += '<div class="mix-list">';
+  compatEntries.good.forEach(function(m) { h += renderMixItem(m, "good", "\u25CF"); });
+  compatEntries.ok.forEach(function(m) { h += renderMixItem(m, "ok", "\u25B2"); });
+  compatEntries.bad.forEach(function(m) { h += renderMixItem(m, "bad", "\u00D7"); });
+  h += '</div></div>';
+  return h;
+}
+
+function renderCautionSection(med) {
+  if (med.official) {
+    let h = '<div class="detail-section">';
+    h += '<div class="detail-label">\u26A0\uFE0F 注意</div>';
+    h += '<div class="caution-box">食品に混ぜた薬はすぐに服用してください。味や香りはメーカーによって異なることがあります。</div>';
+    h += '</div>';
+    return h;
+  }
+  if (!med.caution) return "";
+  let h = '<div class="detail-section">';
+  h += '<div class="detail-label">\u26A0\uFE0F 注意</div>';
+  h += '<div class="caution-box">' + med.caution + '</div>';
+  h += '</div>';
+  return h;
+}
+
+function renderSourceSection(med) {
+  var source = getSourceMeta(med);
+  if (!source) return "";
+  var h = '<div class="detail-section">';
+  h += '<div class="detail-label">\u{1F4D6} 出典</div>';
+  if (source.url) {
+    h += '<div class="detail-text">' + source.label + '</div>';
+    h += '<div class="detail-text" style="margin-top:4px;"><a href="' + source.url + '" target="_blank" rel="noopener" style="color:var(--primary);">' + source.detail + '</a></div>';
+  } else {
+    h += '<div class="detail-text">' + source.label + '</div>';
+  }
+  h += '</div>';
+  return h;
+}
+
+function renderMemoPreview(med) {
+  var memo = getMemo(med.id).trim();
+  if (!memo) return "";
+  return '<div class="memo-preview"><div class="memo-preview-label">メモ</div><div class="memo-preview-text">' + escapeHtml(memo) + '</div></div>';
+}
+
+function renderMemoSection(med) {
+  var memo = getMemo(med.id);
+  var h = '<div class="detail-section">';
+  h += '<div class="detail-label">\u{1F4DD} メモ</div>';
+  h += '<textarea class="memo-textarea" data-memo-id="' + escapeHtml(med.id) + '" placeholder="○○との組み合わせ、スムーズに飲んでくれた など">' + escapeHtml(memo) + '</textarea>';
+  h += '<div class="memo-help">この端末だけに保存される個人メモです。公開データや監修データには含まれません。</div>';
+  h += '</div>';
+  return h;
+}
+
+function renderInlineMemoEditor(med) {
+  return '<div class="card-inline-memo">' + renderMemoSection(med) + '</div>';
+}
+
+function renderDetailSections(med) {
+  return renderTasteSection(med) +
+    renderGenericSection(med) +
+    renderMixSection(med) +
+    renderCautionSection(med) +
+    renderMemoSection(med) +
+    renderSourceSection(med);
+}
+
+function renderPopupContent(med) {
+  var faved = isFav(med.id);
+  var h = '<div class="med-popup-header">';
+  h += '<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;">';
+  h += '<div style="flex:1;min-width:0;">';
+  h += '<div class="med-popup-name">' + getDisplayName(med) + '</div>';
+  if (med.type === "kampo" && getKampoNumber(med)) {
+    h += '<div class="med-popup-sub">ツムラ ' + getKampoNumber(med) + '</div>';
+  }
+  h += '<div class="med-popup-sub">' + med.generic + '</div>';
+  h += '<div class="med-popup-sub">' + getMakerLabel(med) + '</div>';
+  h += renderSourceBadge(med);
+  h += '</div>';
+  h += '<button class="fav-btn popup-fav-btn ' + (faved ? "active" : "") + '" data-fav-id="' + med.id + '" aria-label="お気に入り" onclick="handleFav(event,\'' + med.id + '\')">' + getFavIcon(faved) + '</button>';
+  h += '</div>';
+  h += '<div class="card-badges" style="margin-top:10px;justify-content:flex-start;max-width:none;">' + renderCardTasteBadges(med) + '</div>';
+  h += renderCompatSummary(med);
+  h += '</div>';
+  h += '<div class="med-popup-body">' + renderDetailSections(med) + '</div>';
+  return h;
+}
+
+function renderCard(med, options) {
+  options = options || {};
+  var isOpen = !!options.openByDefault;
+  var showInlineMemoEditor = !!options.showInlineMemoEditor;
+  const faved = isFav(med.id);
+  let h = '<div class="card' + (isOpen ? ' open' : '') + '" data-id="' + med.id + '">';
+  h += '<div class="card-header" onclick="toggleCard(\'' + med.id + '\')">';
+  h += '<div class="card-title-area">';
+  h += '<div class="card-name-row"><div class="card-name">' + getDisplayName(med) + '</div>';
+  if (med.type === "kampo" && getKampoNumber(med)) {
+    h += '<span class="kampo-code">ツムラ ' + getKampoNumber(med) + '</span>';
+  }
+  h += '</div>';
+  h += '<div class="card-generic">' + med.generic + '</div>';
+  h += '<div class="card-maker">' + getMakerLabel(med) + '</div>';
+  h += renderSourceBadge(med);
+  h += renderCompatSummary(med);
+  if (options.showMemoPreview) h += renderMemoPreview(med);
+  h += '</div>';
+  h += '<div class="card-meta">';
+  h += '<div class="card-top-actions">';
+  h += '<button class="fav-btn ' + (faved ? "active" : "") + '" data-fav-id="' + med.id + '" aria-label="お気に入り" onclick="handleFav(event,\'' + med.id + '\')">' + getFavIcon(faved) + '</button>';
+  h += '<div class="card-badges">' + renderCardTasteBadges(med) + '</div>';
+  h += '<span class="expand-icon">\u25BC</span>';
+  h += '</div></div></div>';
+  if (showInlineMemoEditor) h += renderInlineMemoEditor(med);
+
+  h += '<div class="card-detail"><div class="card-detail-inner">';
+  h += renderDetailSections(med);
+  h += '</div></div></div>';
+  return h;
+}
+
+function toggleCard(id) {
+  var card = document.querySelector('.card[data-id="' + id + '"]');
+  if (card) card.classList.toggle("open");
+}
+
+function handleFav(e, id) {
+  e.stopPropagation();
+  var nowFav = toggleFav(id);
+  document.querySelectorAll('.fav-btn[data-fav-id="' + id + '"]').forEach(function(btn) {
+    btn.classList.toggle("active", nowFav);
+    btn.textContent = getFavIcon(nowFav);
+  });
+  if (currentPage === "page-saved") renderSaved();
+}
+
+// ========== フィルタリング ==========
+var currentFilter = "all";
+var currentMaker = "all";
+var currentPage = "page-list";
+var currentSavedFilter = "all";
+var activePopupMedId = "";
+
+function filterByPublicCategory(list, filterValue) {
+  if (filterValue === "all") return list;
+  if (filterValue === "kampo") {
+    return list.filter(function(m) { return m.type === "kampo"; });
+  }
+  return list.filter(function(m) { return m.category.indexOf(filterValue) !== -1; });
+}
+
+function getFilteredMeds() {
+  var list = getPublicMedicines();
+  var q = document.getElementById("searchInput").value.trim().toLowerCase();
+
+  if (q) {
+    list = list.filter(function(m) {
+      return getDisplayName(m).toLowerCase().indexOf(q) !== -1 ||
+        m.name.toLowerCase().indexOf(q) !== -1 ||
+        m.generic.toLowerCase().indexOf(q) !== -1 ||
+        getMakerLabel(m).toLowerCase().indexOf(q) !== -1 ||
+        getDisplayTasteLabel(m).toLowerCase().indexOf(q) !== -1 ||
+        getDisplayFlavorLabel(m).toLowerCase().indexOf(q) !== -1 ||
+        m.maker.toLowerCase().indexOf(q) !== -1 ||
+        m.tasteDetail.toLowerCase().indexOf(q) !== -1 ||
+        (m.generics && m.generics.some(function(g) {
+          return g.name.toLowerCase().indexOf(q) !== -1 || g.maker.toLowerCase().indexOf(q) !== -1;
+        }));
+    });
+  }
+
+  list = filterByPublicCategory(list, currentFilter);
+
+  if (currentMaker !== "all") {
+    list = list.filter(function(m) { return getMakerLabel(m) === currentMaker; });
+  }
+
+  return list;
+}
+
+function renderList() {
+  var filtered = getFilteredMeds();
+  var publicMeds = getPublicMedicines();
+  var container = document.getElementById("cardList");
+  var empty = document.getElementById("emptyState");
+  var count = document.getElementById("resultCount");
+  var emptyMessage = document.getElementById("emptyStateMessage");
+
+  if (filtered.length === 0) {
+    container.innerHTML = "";
+    empty.style.display = "block";
+    count.textContent = buildPublicCountText(0, publicMeds.length);
+    emptyMessage.textContent = publicMeds.length === 0
+      ? "公開資料に掲載された薬はまだ表示されていません"
+      : "該当する公開対象の薬が見つかりません";
+  } else {
+    empty.style.display = "none";
+    count.textContent = buildPublicCountText(filtered.length, publicMeds.length);
+    // 「すべて」かつ検索なしの場合、カテゴリ別のセクションヘッダーを挿入
+    var q = document.getElementById("searchInput").value.trim();
+    if (currentFilter === "all" && currentMaker === "all" && !q) {
+      var catOrder = ["antibiotics","cold","allergy","asthma","stomach","neuro"];
+      var catIcons = {antibiotics:"💊",cold:"🤧",allergy:"🌸",asthma:"🫁",stomach:"🏥",neuro:"🧠"};
+      var grouped = {};
+      var kampoList = [];
+      filtered.forEach(function(m) {
+        if (m.type === "kampo") { kampoList.push(m); return; }
+        var placed = false;
+        for (var i = 0; i < catOrder.length; i++) {
+          if (m.category.indexOf(catOrder[i]) !== -1) {
+            if (!grouped[catOrder[i]]) grouped[catOrder[i]] = [];
+            grouped[catOrder[i]].push(m);
+            placed = true;
+            break;
+          }
+        }
+        if (!placed) {
+          if (!grouped["other"]) grouped["other"] = [];
+          grouped["other"].push(m);
+        }
+      });
+      var fullCatLabels = {antibiotics:"抗生剤",cold:"かぜ薬",allergy:"抗アレルギー薬",asthma:"気管支薬",stomach:"胃腸薬",neuro:"けいれん・神経系",other:"その他"};
+      var html = "";
+      catOrder.forEach(function(cat) {
+        if (grouped[cat] && grouped[cat].length > 0) {
+          html += '<div class="cat-section-header"><span class="cat-icon">' + (catIcons[cat]||"") + '</span>' + fullCatLabels[cat] + '</div>';
+          html += grouped[cat].map(function(med) { return renderCard(med); }).join("");
+        }
+      });
+      if (grouped["other"] && grouped["other"].length > 0) {
+        html += '<div class="cat-section-header"><span class="cat-icon">💊</span>' + fullCatLabels["other"] + '</div>';
+        html += grouped["other"].map(function(med) { return renderCard(med); }).join("");
+      }
+      if (kampoList.length > 0) {
+        html += '<div class="cat-section-header"><span class="cat-icon">🌿</span>漢方薬</div>';
+        html += kampoList.map(function(med) { return renderCard(med); }).join("");
+      }
+      container.innerHTML = html;
+    } else {
+      container.innerHTML = filtered.map(function(med) { return renderCard(med); }).join("");
+    }
+  }
+  updatePublicReviewNotes();
+}
+
+function renderSaved() {
+  var favs = getFavs();
+  var memoIds = Object.keys(getMemos()).filter(function(id) { return getMemo(id).trim(); });
+  var summary = document.getElementById("savedSummary");
+  var savedMeds = getPublicMedicines().filter(function(med) {
+    var isFavorite = favs.indexOf(med.id) !== -1;
+    var hasMemo = memoIds.indexOf(med.id) !== -1;
+    if (currentSavedFilter === "favorites") return isFavorite;
+    if (currentSavedFilter === "memo") return hasMemo;
+    return isFavorite || hasMemo;
+  });
+  var container = document.getElementById("savedList");
+  var empty = document.getElementById("savedEmpty");
+  var count = document.getElementById("savedCount");
+  var emptyMessage = document.getElementById("savedEmptyMessage");
+  if (summary) {
+    summary.innerHTML =
+      '<div class="saved-summary-chip">保存済み <strong>' + savedMeds.length + '件</strong></div>' +
+      '<div class="saved-summary-chip">お気に入り <strong>' + getPublicMedicines().filter(function(med) { return favs.indexOf(med.id) !== -1; }).length + '件</strong></div>' +
+      '<div class="saved-summary-chip">メモあり <strong>' + getPublicMedicines().filter(function(med) { return memoIds.indexOf(med.id) !== -1; }).length + '件</strong></div>';
+  }
+
+  if (!savedMeds.length) {
+    container.innerHTML = "";
+    empty.style.display = "block";
+    count.textContent = "";
+    if (currentSavedFilter === "favorites") {
+      emptyMessage.textContent = favs.length
+        ? "お気に入りの薬はありますが、公開対象のものだけを表示しています"
+        : "お気に入りに登録された薬はありません";
+    } else if (currentSavedFilter === "memo") {
+      emptyMessage.textContent = memoIds.length
+        ? "メモ済みの薬がありますが、公開対象のものだけを表示しています"
+        : "メモが保存された薬はありません";
+    } else {
+      emptyMessage.textContent = "お気に入りまたはメモが保存された薬はありません";
+    }
+  } else {
+    empty.style.display = "none";
+    count.textContent = savedMeds.length + "件";
+    container.innerHTML = savedMeds.map(function(med) {
+      return renderCard(med, { showInlineMemoEditor: true });
+    }).join("");
+  }
+  updatePublicReviewNotes();
+}
+
+// メーカーフィルター生成
+function renderMakerFilter() {
+  var makers = [];
+  getPublicMedicines().forEach(function(m) {
+    var makerLabel = getMakerLabel(m);
+    if (makers.indexOf(makerLabel) === -1) makers.push(makerLabel);
+  });
+  makers.sort();
+  if (currentMaker !== "all" && makers.indexOf(currentMaker) === -1) currentMaker = "all";
+  var container = document.getElementById("makerFilter");
+  var h = '<div class="maker-btn ' + (currentMaker === "all" ? 'active' : '') + '" data-maker="all">\u3059\u3079\u3066</div>';
+  makers.forEach(function(mk) {
+    h += '<div class="maker-btn ' + (currentMaker === mk ? 'active' : '') + '" data-maker="' + mk + '">' + mk + '</div>';
+  });
+  container.innerHTML = h;
+}
+
+function renderCategoryTabs() {
+  currentFilter = renderFilterTabs("categoryTabs", "filter", currentFilter, listFilterOrder);
+}
+
+function renderTableFilterTabs() {
+  currentTableFilter = renderFilterTabs("tableFilterTabs", "tfilter", currentTableFilter, tableFilterOrder);
+}
+
+function syncPublicFilters() {
+  renderCategoryTabs();
+  renderTableFilterTabs();
+  renderMakerFilter();
+}
+
+function resetPageScroll(page) {
+  function apply() {
+    var pageEl = document.getElementById(page);
+    if (pageEl && typeof pageEl.scrollIntoView === "function") {
+      try { pageEl.scrollIntoView({ block: "start" }); } catch (err) {}
+    }
+    if (typeof window.scrollTo === "function") window.scrollTo(0, 0);
+    if (document.documentElement) document.documentElement.scrollTop = 0;
+    if (document.body) document.body.scrollTop = 0;
+    var tableWrap = document.querySelector("#page-table .table-wrap");
+    if (tableWrap) {
+      tableWrap.scrollTop = 0;
+      if (page === "page-table") tableWrap.scrollLeft = 0;
+    }
+    if (page === "page-table") syncCompatStickyHead();
+  }
+  apply();
+  if (typeof window.requestAnimationFrame === "function") {
+    window.requestAnimationFrame(apply);
+  }
+  setTimeout(apply, 0);
+}
+
+function setCurrentPage(page) {
+  closeMedPopup();
+  document.querySelectorAll(".nav-item").forEach(function(n) { n.classList.remove("active"); });
+  var navItem = document.querySelector('.nav-item[data-page="' + page + '"]');
+  if (navItem) navItem.classList.add("active");
+  document.querySelectorAll(".page").forEach(function(p) { p.classList.remove("active"); });
+  var pageEl = document.getElementById(page);
+  if (pageEl) pageEl.classList.add("active");
+  currentPage = page;
+  updateStickyMetrics();
+  if (page === "page-saved") renderSaved();
+  if (page === "page-table") renderCompatTable();
+  if (page === "page-review") renderReviewDashboard();
+  resetPageScroll(page);
+}
+
+// イベント
+document.getElementById("searchInput").addEventListener("input", renderList);
+
+document.getElementById("categoryTabs").addEventListener("click", function(e) {
+  var tab = e.target.closest(".filter-tab");
+  if (!tab) return;
+  document.querySelectorAll("#categoryTabs .filter-tab").forEach(function(t) { t.classList.remove("active"); });
+  tab.classList.add("active");
+  currentFilter = tab.dataset.filter;
+  renderList();
+});
+
+document.getElementById("makerFilter").addEventListener("click", function(e) {
+  var btn = e.target.closest(".maker-btn");
+  if (!btn) return;
+  document.querySelectorAll(".maker-btn").forEach(function(b) { b.classList.remove("active"); });
+  btn.classList.add("active");
+  currentMaker = btn.dataset.maker;
+  renderList();
+});
+
+document.querySelector(".bottom-nav").addEventListener("click", function(e) {
+  var item = e.target.closest(".nav-item");
+  if (!item) return;
+  setCurrentPage(item.dataset.page);
+});
+
+document.getElementById("savedFilterTabs").addEventListener("click", function(e) {
+  var tab = e.target.closest(".filter-tab");
+  if (!tab) return;
+  document.querySelectorAll("#savedFilterTabs .filter-tab").forEach(function(t) { t.classList.remove("active"); });
+  tab.classList.add("active");
+  currentSavedFilter = tab.dataset.savedFilter;
+  renderSaved();
+});
+
+// ========== 飲み合わせ表（medicines データから動的生成） ==========
+var foodCols = officialFoodCols.slice();
+// ココア, プリン, 牛乳, アイス, お茶, ヨーグルト, りんごジュース, オレンジ飲料, 乳酸菌飲料, スポーツ飲料
+
+var catLabelMap = {
+  antibiotics: "\u6297\u751F\u5264", cold: "\u304B\u305C\u85AC", stomach: "\u80C3\u8178\u85AC",
+  allergy: "\u6297\u30A2\u30EC\u30EB\u30AE\u30FC", asthma: "\u6C17\u7BA1\u652F", neuro: "\u3051\u3044\u308C\u3093"
+};
+
+function mapFoodName(name) {
+  var n = name;
+  var hits = [];
+  if (n.indexOf("\u30B3\u30B3\u30A2") !== -1 || n.indexOf("\u30C1\u30E7\u30B3") !== -1) hits.push("\u30B3\u30B3\u30A2");
+  if (n.indexOf("\u30D7\u30EA\u30F3") !== -1 || n.indexOf("\u30BC\u30EA\u30FC") !== -1) hits.push("\u30D7\u30EA\u30F3");
+  if (n.indexOf("\u725B\u4E73") !== -1) hits.push("\u725B\u4E73");
+  if (n.indexOf("\u30A2\u30A4\u30B9") !== -1) hits.push("\u30A2\u30A4\u30B9");
+  if (n.indexOf("\u304A\u8336") !== -1) hits.push("\u304A\u8336");
+  if (n.indexOf("\u30E8\u30FC\u30B0\u30EB\u30C8") !== -1) hits.push("\u30E8\u30FC\u30B0\u30EB\u30C8");
+  if (n.indexOf("\u308A\u3093\u3054") !== -1) hits.push("\u308A\u3093\u3054\u30B8\u30E5\u30FC\u30B9");
+  if (n.indexOf("\u30AA\u30EC\u30F3\u30B8") !== -1) hits.push("\u30AA\u30EC\u30F3\u30B8\u98F2\u6599");
+  if (n.indexOf("\u4E73\u9178\u83CC") !== -1 || n.indexOf("\u30E4\u30AF\u30EB\u30C8") !== -1) hits.push("\u4E73\u9178\u83CC\u98F2\u6599");
+  if (n.indexOf("\u30B9\u30DD\u30FC\u30C4") !== -1) hits.push("\u30B9\u30DD\u30FC\u30C4\u98F2\u6599");
+  if (n.indexOf("\u9178\u6027\u98F2\u6599") !== -1 || n.indexOf("\u9178\u6027") !== -1) { hits.push("\u30AA\u30EC\u30F3\u30B8\u98F2\u6599"); hits.push("\u30B9\u30DD\u30FC\u30C4\u98F2\u6599"); }
+  return hits;
+}
+
+function getMedCompat(med) {
+  if (med.official) return med.official.compat.slice();
+  var result = {};
+  foodCols.forEach(function(f) { result[f] = "N"; });
+  med.mixBad.forEach(function(item) {
+    mapFoodName(item.name).forEach(function(col) { if (result[col] === "N") result[col] = "B"; });
+  });
+  med.mixOk.forEach(function(item) {
+    mapFoodName(item.name).forEach(function(col) { result[col] = "O"; });
+  });
+  med.mixGood.forEach(function(item) {
+    mapFoodName(item.name).forEach(function(col) { result[col] = "G"; });
+  });
+  return foodCols.map(function(f) { return result[f]; });
+}
+
+function getTasteLabel(med) {
+  return getDisplayTasteLabel(med);
+}
+
+function getCatLabel(med) {
+  // 最初のカテゴリのラベルを返す
+  for (var i = 0; i < med.category.length; i++) {
+    if (catLabelMap[med.category[i]]) return catLabelMap[med.category[i]];
+  }
+  return med.type === "kampo" ? "\u6F22\u65B9" : "\u305D\u306E\u4ED6";
+}
+
+var currentTableFilter = "all";
+
+function getTableMeds() {
+  var list = getPublicMedicines();
+  return filterByPublicCategory(list, currentTableFilter);
+}
+
+function openMedPopup(id) {
+  var med = medicines.find(function(item) { return item.id === id; });
+  if (!med || !isPublicMed(med)) return;
+  activePopupMedId = id;
+  var popup = document.getElementById("medPopup");
+  var body = document.getElementById("medPopupBody");
+  if (!popup || !body) return;
+  body.innerHTML = renderPopupContent(med);
+  popup.style.display = "block";
+  document.body.style.overflow = "hidden";
+}
+
+function closeMedPopup() {
+  var popup = document.getElementById("medPopup");
+  var body = document.getElementById("medPopupBody");
+  if (!popup || popup.style.display === "none") return;
+  popup.style.display = "none";
+  if (body) body.innerHTML = "";
+  activePopupMedId = "";
+  document.body.style.overflow = "";
+}
+
+function renderCompatTable() {
+  var filtered = getTableMeds();
+  var totalPublic = getPublicMedicines().length;
+  var columnCount = foodCols.length + 6;
+  var symMap = {
+    G: '<span class="sym-good">\u25CF</span>',
+    O: '<span class="sym-ok">\u25B2</span>',
+    B: '<span class="sym-bad">\u00D7</span>',
+    N: '<span class="sym-none">\u2015</span>'
+  };
+  var foodLabels = foodCols;
+  var headHtml = "<thead><tr>";
+  var bodyHtml = "<tbody>";
+
+  headHtml += '<th class="cat-head" style="min-width:28px;">\u7A2E\u985E</th>';
+  headHtml += '<th class="name-cell" style="background:linear-gradient(180deg, var(--table-head-bg) 0%, var(--primary) 100%);color:#fff;">\u5546\u54C1\u540D</th>';
+  headHtml += '<th class="fav-col">お気に入り</th>';
+  headHtml += '<th style="min-width:50px;">\u5473</th>';
+  headHtml += '<th style="min-width:50px;">\u9999\u308A</th>';
+  foodLabels.forEach(function(f) { headHtml += '<th class="food-col">' + f + '</th>'; });
+  headHtml += '<th class="memo-col">メモ</th>';
+  headHtml += "</tr></thead>";
+
+  if (!filtered.length) {
+    bodyHtml += '<tr><td colspan="' + columnCount + '" style="padding:16px 12px;text-align:left;color:var(--text-light);">公開資料に掲載された相性データがまだ公開されていません。</td></tr></tbody>';
+    document.getElementById("compatTable").innerHTML = headHtml + bodyHtml;
+    document.getElementById("compatStickyHead").innerHTML = '<table class="compat-table">' + headHtml + '</table>';
+    syncCompatStickyHead();
+    document.getElementById("tableCount").textContent = buildPublicCountText(0, totalPublic);
+    updatePublicReviewNotes();
+    return;
+  }
+
+  // カテゴリごとにグルーピング
+  var groups = {};
+  var groupOrder = [];
+  filtered.forEach(function(m) {
+    var cl = getCatLabel(m);
+    if (!groups[cl]) { groups[cl] = []; groupOrder.push(cl); }
+    groups[cl].push(m);
+  });
+
+  groupOrder.forEach(function(cl) {
+    var meds = groups[cl];
+    meds.forEach(function(m, idx) {
+      var compat = getMedCompat(m);
+      bodyHtml += "<tr>";
+      if (idx === 0) {
+        bodyHtml += '<td class="cat-cell" rowspan="' + meds.length + '">' + cl + '</td>';
+      }
+      var faved = isFav(m.id);
+      bodyHtml += '<td class="name-cell"><button type="button" data-med-id="' + escapeHtml(m.id) + '">' + escapeHtml(getDisplayName(m)) + '</button></td>';
+      bodyHtml += '<td class="fav-cell"><button class="fav-btn table-fav-btn ' + (faved ? "active" : "") + '" data-fav-id="' + m.id + '" aria-label="お気に入り" onclick="handleFav(event,\'' + m.id + '\')">' + getFavIcon(faved) + '</button></td>';
+      bodyHtml += '<td class="taste-cell">' + getTasteLabel(m) + '</td>';
+      bodyHtml += '<td class="flavor-cell">' + getDisplayFlavorLabel(m) + '</td>';
+      compat.forEach(function(c) { bodyHtml += "<td>" + symMap[c] + "</td>"; });
+      bodyHtml += '<td class="memo-cell"><textarea class="memo-textarea table-memo-textarea" data-memo-id="' + escapeHtml(m.id) + '" placeholder="メモ">' + escapeHtml(getMemo(m.id)) + '</textarea></td>';
+      bodyHtml += "</tr>";
+    });
+  });
+
+  bodyHtml += "</tbody>";
+  document.getElementById("compatTable").innerHTML = headHtml + bodyHtml;
+  document.getElementById("compatStickyHead").innerHTML = '<table class="compat-table">' + headHtml + '</table>';
+  syncCompatStickyHead();
+  document.getElementById("tableCount").textContent = buildPublicCountText(filtered.length, totalPublic);
+  updatePublicReviewNotes();
+}
+
+document.getElementById("tableFilterTabs").addEventListener("click", function(e) {
+  var tab = e.target.closest(".filter-tab");
+  if (!tab) return;
+  document.querySelectorAll("#tableFilterTabs .filter-tab").forEach(function(t) { t.classList.remove("active"); });
+  tab.classList.add("active");
+  currentTableFilter = tab.dataset.tfilter;
+  renderCompatTable();
+});
+
+document.getElementById("compatTable").addEventListener("click", function(e) {
+  var btn = e.target.closest("button[data-med-id]");
+  if (!btn) return;
+  openMedPopup(btn.dataset.medId);
+});
+
+function syncMemoTextareas(id, value, sourceEl) {
+  document.querySelectorAll('.memo-textarea[data-memo-id="' + id + '"]').forEach(function(el) {
+    if (el !== sourceEl && el.value !== value) el.value = value;
+  });
+  document.querySelectorAll('.card[data-id="' + id + '"] .memo-preview-text').forEach(function(el) {
+    el.textContent = value.trim();
+  });
+}
+
+document.addEventListener("input", function(e) {
+  var textarea = e.target.closest(".memo-textarea");
+  if (!textarea) return;
+  setMemo(textarea.dataset.memoId, textarea.value);
+  syncMemoTextareas(textarea.dataset.memoId, textarea.value, textarea);
+});
+
+document.addEventListener("blur", function(e) {
+  var textarea = e.target.closest(".memo-textarea");
+  if (!textarea) return;
+  setMemo(textarea.dataset.memoId, textarea.value);
+  if (currentPage === "page-saved") renderSaved();
+}, true);
+
+var medPopupClose = document.getElementById("medPopupClose");
+if (medPopupClose) {
+  medPopupClose.addEventListener("click", closeMedPopup);
+}
+var medPopupBackdrop = document.getElementById("medPopupBackdrop");
+if (medPopupBackdrop) {
+  medPopupBackdrop.addEventListener("click", closeMedPopup);
+}
+window.addEventListener("keydown", function(e) {
+  if (e.key === "Escape") closeMedPopup();
+});
+
+function escapeHtml(text) {
+  return String(text || "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+function escapeCsvCell(text) {
+  var value = String(text || "");
+  if (value.indexOf('"') !== -1) value = value.replace(/"/g, '""');
+  if (/[",\n]/.test(value)) value = '"' + value + '"';
+  return value;
+}
+
+function getReviewMedById(id) {
+  return medicines.find(function(m) { return m.id === id; }) || null;
+}
+
+function ensureSelectedReviewId() {
+  var current = getReviewMedById(selectedReviewId);
+  if (current) return selectedReviewId;
+  var candidates = medicines.slice().sort(function(a, b) {
+    if (!!a.official !== !!b.official) return a.official ? 1 : -1;
+    if (getWorkflowSortRank(a) !== getWorkflowSortRank(b)) return getWorkflowSortRank(a) - getWorkflowSortRank(b);
+    return getDisplayName(a).localeCompare(getDisplayName(b), "ja");
+  });
+  selectedReviewId = candidates.length ? candidates[0].id : "";
+  return selectedReviewId;
+}
+
+function getSelectedReviewMed() {
+  ensureSelectedReviewId();
+  return getReviewMedById(selectedReviewId);
+}
+
+function selectReviewRecord(id) {
+  if (!getReviewMedById(id)) return;
+  selectedReviewId = id;
+  reviewEditorMessage = "";
+  renderReviewDashboard();
+  var editor = document.getElementById("reviewEditor");
+  if (editor && window.innerWidth < 900) editor.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+function summarizeCompatBucket(label, items) {
+  if (!items.length) return "";
+  var names = items.slice(0, 4).map(function(item) { return item.name; }).join("、");
+  if (items.length > 4) names += " ほか";
+  return label + ": " + names;
+}
+
+function getReviewPreviewLines(med) {
+  var compatEntries = getCompatEntries(med);
+  var lines = [
+    "商品名: " + getDisplayName(med),
+    "一般名: " + med.generic,
+    "メーカー: " + getMakerLabel(med),
+    "剤形: " + (med.type === "kampo" ? "漢方" : "散剤"),
+    "カテゴリ: " + med.category.map(function(cat) { return catLabelMap[cat] || cat; }).join(" / "),
+    "味: " + (getDisplayTasteLabel(med) || "未設定"),
+    "香り: " + (getDisplayFlavorLabel(med) || "未設定")
+  ];
+  var compatSummary = [
+    summarizeCompatBucket("飲みやすい", compatEntries.good),
+    summarizeCompatBucket("変わらない", compatEntries.ok),
+    summarizeCompatBucket("飲みにくい", compatEntries.bad),
+    med.official ? summarizeCompatBucket("データなし", compatEntries.none) : ""
+  ].filter(Boolean).join(" / ");
+  lines.push("相性: " + (compatSummary || "設定なし"));
+  lines.push("注意: " + (med.caution || "食品に混ぜた薬はすぐに服用してください"));
+  return lines;
+}
+
+function formatAuditTimestamp(timestamp) {
+  if (!timestamp) return "日時未記録";
+  return timestamp.replace("T", " ").slice(0, 16);
+}
+
+function getReviewActionLabel(action) {
+  var labels = {
+    save: "保存",
+    review_ready: "確認待ちへ送付",
+    approved: "承認",
+    rejected: "差し戻し",
+    published: "公開"
+  };
+  return labels[action] || action;
+}
+
+function getWorkflowStatusDisplay(workflowStatus) {
+  if (workflowStatus === "official_source") return "公的資料掲載";
+  return reviewWorkflowLabels[workflowStatus] || workflowStatus || "未着手";
+}
+
+function getChangedReviewFields(beforeReview, afterReview) {
+  var labels = {
+    reviewer: "監修者",
+    verifiedOn: "確認日",
+    scope: "確認範囲",
+    sourceRefs: "根拠資料",
+    note: "監修コメント",
+    rejectionReason: "差し戻し理由",
+    workflowStatus: "状態",
+    subjectiveTastePrimary: "主な味",
+    subjectiveTasteSecondary: "副次的な味",
+    subjectiveTasteAftertaste: "後味",
+    subjectiveTasteDetail: "味の詳細",
+    subjectiveFlavorPrimary: "主な香り",
+    subjectiveFlavorSecondary: "副次的な香り",
+    subjectiveFlavorDetail: "香りの詳細",
+    subjectiveCaution: "注意事項",
+    subjectiveCompat: "相性マトリクス"
+  };
+  return Object.keys(labels).filter(function(key) {
+    var beforeValue = beforeReview && beforeReview[key];
+    var afterValue = afterReview && afterReview[key];
+    return JSON.stringify(beforeValue || "") !== JSON.stringify(afterValue || "");
+  }).map(function(key) { return labels[key]; });
+}
+
+function renderTasteSelect(id, value, placeholder) {
+  var html = '<select class="review-select" id="' + id + '">';
+  html += '<option value="">' + placeholder + '</option>';
+  normalizedTasteKeys.forEach(function(key) {
+    html += '<option value="' + key + '"' + (value === key ? ' selected' : '') + '>' + tasteLabels[key] + '</option>';
+  });
+  html += '</select>';
+  return html;
+}
+
+function renderFlavorSelect(id, value, placeholder) {
+  var html = '<select class="review-select" id="' + id + '">';
+  html += '<option value="">' + placeholder + '</option>';
+  normalizedFlavorKeys.forEach(function(key) {
+    html += '<option value="' + key + '"' + (value === key ? ' selected' : '') + '>' + normalizedFlavorLabels[key] + '</option>';
+  });
+  html += '</select>';
+  return html;
+}
+
+function renderReviewCompatMatrix(review) {
+  var codes = normalizeCompatCodes(review.subjectiveCompat, []);
+  return '<div class="review-compat-grid">' + officialFoodCols.map(function(name, index) {
+    return '<div class="review-compat-row"><div class="review-compat-label">' + name + '</div><select class="review-select" id="reviewCompat_' + index + '">' +
+      '<option value="G"' + (codes[index] === "G" ? ' selected' : '') + '>飲みやすい</option>' +
+      '<option value="O"' + (codes[index] === "O" ? ' selected' : '') + '>変わらない</option>' +
+      '<option value="B"' + (codes[index] === "B" ? ' selected' : '') + '>飲みにくい</option>' +
+      '<option value="N"' + (codes[index] === "N" ? ' selected' : '') + '>データなし</option>' +
+    '</select></div>';
+  }).join("") + '</div>';
+}
+
+function renderReviewEditor() {
+  var container = document.getElementById("reviewEditor");
+  if (!container) return;
+  var med = getSelectedReviewMed();
+  if (!med) {
+    container.innerHTML = '<div class="review-editor-title">監修入力</div><div class="review-editor-sub">一覧から対象薬を選ぶと、ここに監修パネルが表示されます。</div>';
+    return;
+  }
+
+  var previewLines = getReviewPreviewLines(med);
+  var review = med.review;
+  var statusClass = getReviewStatusClass(med);
+  var messageHtml = reviewEditorMessage ? '<div class="review-editor-msg">' + escapeHtml(reviewEditorMessage) + '</div>' : "";
+  var versionText = "v" + review.version + (review.updatedAt ? " / 最終更新 " + formatAuditTimestamp(review.updatedAt) : "");
+  var headerHtml = '<div class="review-editor-title">監修入力</div>' +
+    '<div class="review-editor-sub">' + escapeHtml(getDisplayName(med)) + ' / ' + escapeHtml(getReviewStatusLabel(med)) + ' / ' + escapeHtml(versionText) + '</div>' +
+    messageHtml +
+    '<div class="review-preview-box"><div class="review-preview-title">公開内容プレビュー</div><div class="review-preview-text">' + previewLines.map(escapeHtml).join("<br>") + '</div></div>';
+
+  if (med.official) {
+    container.innerHTML = headerHtml +
+      '<div class="review-inline-note">公的資料掲載薬は参照専用です。追加薬だけが監修入力と公開フローの対象です。</div>';
+    return;
+  }
+
+  var actionNote = review.workflowStatus === "published"
+    ? "公開中の追加薬です。内容を更新する場合は、保存すると再確認フローに戻ります。"
+    : "保存は下書きです。公開画面に出すには、承認後に必ず公開ボタンを押してください。";
+
+  container.innerHTML = headerHtml +
+    '<div class="review-editor-grid">' +
+      '<div class="review-field"><label for="reviewTastePrimary">主な味</label>' + renderTasteSelect("reviewTastePrimary", review.subjectiveTastePrimary, "主な味を選択") + '</div>' +
+      '<div class="review-field"><label for="reviewTasteSecondary">副次的な味</label>' + renderTasteSelect("reviewTasteSecondary", review.subjectiveTasteSecondary, "必要なら選択") + '</div>' +
+      '<div class="review-field"><label for="reviewTasteAftertaste">後味</label>' + renderTasteSelect("reviewTasteAftertaste", review.subjectiveTasteAftertaste, "必要なら選択") + '</div>' +
+      '<div class="review-field"><label for="reviewTasteDetail">味の詳細</label><textarea id="reviewTasteDetail" class="review-textarea" placeholder="例: 甘いが後味にやや苦味">' + escapeHtml(review.subjectiveTasteDetail || "") + '</textarea></div>' +
+      '<div class="review-field"><label for="reviewFlavorPrimary">主な香り</label>' + renderFlavorSelect("reviewFlavorPrimary", review.subjectiveFlavorPrimary, "主な香りを選択") + '<div class="review-normalized-note">無香料や漢方特有もここで選びます。</div></div>' +
+      '<div class="review-field"><label for="reviewFlavorSecondary">副次的な香り</label>' + renderFlavorSelect("reviewFlavorSecondary", review.subjectiveFlavorSecondary, "必要なら選択") + '</div>' +
+      '<div class="review-field"><label for="reviewFlavorDetail">香りの詳細</label><input id="reviewFlavorDetail" class="review-input" type="text" value="' + escapeHtml(review.subjectiveFlavorDetail || "") + '" placeholder="例: フルーツ寄り、やや弱い香り"></div>' +
+      '<div class="review-field"><label for="reviewCaution">服用時の注意</label><textarea id="reviewCaution" class="review-textarea" placeholder="例: 酸性飲料に混ぜない">' + escapeHtml(review.subjectiveCaution || "") + '</textarea></div>' +
+      '<div class="review-field"><label>相性マトリクス</label>' + renderReviewCompatMatrix(review) + '</div>' +
+      '<div class="review-field"><label for="reviewUpdatedBy">操作者</label><input id="reviewUpdatedBy" class="review-input" type="text" value="' + escapeHtml(review.updatedBy || "") + '" placeholder="例: 管理者A"></div>' +
+      '<div class="review-field"><label for="reviewReviewer">薬剤師監修者</label><input id="reviewReviewer" class="review-input" type="text" value="' + escapeHtml(review.reviewer || "") + '" placeholder="例: 薬剤師 山田"></div>' +
+      '<div class="review-field"><label for="reviewVerifiedOn">確認日</label><input id="reviewVerifiedOn" class="review-input" type="date" value="' + escapeHtml(review.verifiedOn || "") + '"></div>' +
+      '<div class="review-field"><label for="reviewFormVersion">編集中バージョン</label><input id="reviewFormVersion" class="review-input" type="text" value="' + escapeHtml(String(review.version)) + '" readonly></div>' +
+      '<div class="review-field"><label for="reviewScope">確認範囲</label><input id="reviewScope" class="review-input" type="text" value="' + escapeHtml(review.scope || "") + '" placeholder="例: 製品名 / 一般名 / 相性表現を確認"></div>' +
+      '<div class="review-field"><label for="reviewSourceRefs">根拠資料</label><textarea id="reviewSourceRefs" class="review-textarea" placeholder="例: PMDA URL / メーカー資料 / 院内資料">' + escapeHtml(review.sourceRefs || "") + '</textarea></div>' +
+      '<div class="review-field"><label for="reviewNote">監修コメント</label><textarea id="reviewNote" class="review-textarea" placeholder="公開判断や確認メモを記録">' + escapeHtml(review.note || "") + '</textarea></div>' +
+      '<div class="review-field"><label for="reviewRejectReason">差し戻し理由</label><textarea id="reviewRejectReason" class="review-textarea" placeholder="差し戻す場合のみ記入">' + escapeHtml(review.rejectionReason || "") + '</textarea></div>' +
+    '</div>' +
+    '<div class="review-action-row">' +
+      '<button type="button" class="review-action-btn" data-action="save">保存</button>' +
+      '<button type="button" class="review-action-btn" data-action="review_ready">確認待ちへ送る</button>' +
+      '<button type="button" class="review-action-btn primary" data-action="approved">承認</button>' +
+      '<button type="button" class="review-action-btn warn" data-action="rejected">差し戻し</button>' +
+      '<button type="button" class="review-action-btn primary" data-action="published">公開</button>' +
+    '</div>' +
+    '<div class="review-inline-note"><span class="review-status-pill review-status-' + statusClass + '">' + escapeHtml(getReviewStatusLabel(med)) + '</span> ' + escapeHtml(actionNote) + '</div>' +
+    '<div class="review-inline-note">このデモでは入力内容と監査ログをこのブラウザの `localStorage` に保存します。共有端末や本番配布アプリでは使わず、将来は認証付きの別管理画面へ分離してください。</div>';
+}
+
+function renderReviewAudit() {
+  var container = document.getElementById("reviewAudit");
+  if (!container) return;
+  var med = getSelectedReviewMed();
+  if (!med) {
+    container.innerHTML = '<div class="review-editor-title">監査ログ</div><div class="review-editor-sub">対象薬を選ぶと、ここに状態遷移の履歴が表示されます。</div>';
+    return;
+  }
+  var entries = getReviewAuditEntries(med.id);
+  var sourceMeta = getSourceMeta(med);
+  var h = '<div class="review-editor-title">監査ログ</div>';
+  h += '<div class="review-editor-sub">' + escapeHtml(getDisplayName(med)) + ' / ' + escapeHtml(getReviewStatusLabel(med)) + '</div>';
+  h += '<div class="review-preview-box"><div class="review-preview-title">現在の出典</div><div class="review-preview-text">' + escapeHtml(sourceMeta ? (sourceMeta.label + " / " + sourceMeta.detail) : "未設定") + '</div></div>';
+  if (!entries.length) {
+    h += '<div class="review-editor-msg">まだ操作履歴はありません。最初の保存・承認・差し戻し・公開操作からここに追記されます。</div>';
+  } else {
+    h += '<div class="review-audit-list">';
+    entries.forEach(function(entry) {
+      var changeLabel = entry.changedFields && entry.changedFields.length ? entry.changedFields.join(" / ") : "変更項目なし";
+      var reviewLabel = entry.reviewer ? " / 監修者 " + escapeHtml(entry.reviewer) : "";
+      h += '<div class="review-audit-item">';
+      h += '<div class="review-audit-head">' + escapeHtml(formatAuditTimestamp(entry.timestamp)) + ' / ' + escapeHtml(getReviewActionLabel(entry.action)) + ' / ' + escapeHtml(entry.actor || "操作者未記録") + '</div>';
+      h += '<div class="review-audit-body">状態: ' + escapeHtml(getWorkflowStatusDisplay(entry.fromStatus)) + ' -> ' + escapeHtml(getWorkflowStatusDisplay(entry.toStatus)) + reviewLabel + '<br>変更: ' + escapeHtml(changeLabel) + '<br>メモ: ' + escapeHtml(entry.summary || "記録なし") + '</div>';
+      h += '</div>';
+    });
+    h += '</div>';
+  }
+  h += '<div class="review-inline-note">監査ログは append-only を意識して追記のみで扱っていますが、静的HTMLでは改ざん防止までは担保できません。本番はサーバー側で保存してください。</div>';
+  container.innerHTML = h;
+}
+
+function getReviewFormValues() {
+  function valueOf(id) {
+    var el = document.getElementById(id);
+    return el ? el.value.trim() : "";
+  }
+  var tastePrimary = normalizeTasteKey(valueOf("reviewTastePrimary"));
+  var tasteSecondary = normalizeTasteKey(valueOf("reviewTasteSecondary"));
+  var tasteAftertaste = normalizeTasteKey(valueOf("reviewTasteAftertaste"));
+  var flavorPrimary = normalizeFlavorKey(valueOf("reviewFlavorPrimary"));
+  var flavorSecondary = normalizeFlavorKey(valueOf("reviewFlavorSecondary"));
+  var flavorDetail = valueOf("reviewFlavorDetail");
+  var compatCodes = officialFoodCols.map(function(name, index) {
+    var el = document.getElementById("reviewCompat_" + index);
+    return el ? el.value : "N";
+  });
+  return {
+    subjectiveTastePrimary: tastePrimary,
+    subjectiveTasteSecondary: tasteSecondary,
+    subjectiveTasteAftertaste: tasteAftertaste,
+    subjectiveTasteTags: buildTasteTagsFromNormalizedFields(tastePrimary, tasteSecondary, tasteAftertaste),
+    subjectiveTasteDetail: valueOf("reviewTasteDetail"),
+    subjectiveFlavorPrimary: flavorPrimary,
+    subjectiveFlavorSecondary: flavorSecondary,
+    subjectiveFlavorDetail: flavorDetail,
+    subjectiveFlavor: buildFlavorLabelFromNormalizedFields(flavorPrimary, flavorSecondary, flavorDetail),
+    subjectiveCaution: valueOf("reviewCaution"),
+    subjectiveCompat: compatCodes,
+    updatedBy: valueOf("reviewUpdatedBy"),
+    reviewer: valueOf("reviewReviewer"),
+    verifiedOn: valueOf("reviewVerifiedOn"),
+    scope: valueOf("reviewScope"),
+    sourceRefs: valueOf("reviewSourceRefs"),
+    note: valueOf("reviewNote"),
+    rejectionReason: valueOf("reviewRejectReason"),
+    formVersion: parseInt(valueOf("reviewFormVersion"), 10) || 0
+  };
+}
+
+function validateReviewAction(med, action, formData) {
+  var errors = [];
+  var hasTasteSummary = !!formData.subjectiveTastePrimary || !!formData.subjectiveTasteDetail;
+  var hasFlavorSummary = !!formData.subjectiveFlavorPrimary || !!formData.subjectiveFlavorDetail;
+  var hasCompatJudgement = formData.subjectiveCompat.some(function(code) { return code === "G" || code === "O" || code === "B"; });
+  if (!med || med.official) {
+    errors.push("公的資料掲載薬は編集できません");
+    return errors;
+  }
+  if (!formData.updatedBy) errors.push("操作者");
+  if (action === "review_ready" || action === "approved" || action === "published") {
+    if (!hasTasteSummary) errors.push("味タグまたは味の詳細");
+    if (!hasFlavorSummary) errors.push("主な香りまたは香りの詳細");
+    if ((formData.subjectiveFlavorPrimary === "other" || formData.subjectiveFlavorSecondary === "other") && !formData.subjectiveFlavorDetail) {
+      errors.push("香りの詳細");
+    }
+    if (!hasCompatJudgement) errors.push("相性マトリクス");
+  }
+  if (action === "review_ready") {
+    if (!formData.scope) errors.push("確認範囲");
+    if (!formData.sourceRefs) errors.push("根拠資料");
+    if (!formData.note) errors.push("監修コメント");
+  }
+  if (action === "approved") {
+    if (!formData.reviewer) errors.push("薬剤師監修者");
+    if (!formData.verifiedOn) errors.push("確認日");
+    if (!formData.scope) errors.push("確認範囲");
+    if (!formData.sourceRefs) errors.push("根拠資料");
+    if (!formData.note) errors.push("監修コメント");
+  }
+  if (action === "rejected") {
+    if (!formData.reviewer) errors.push("薬剤師監修者");
+    if (!formData.rejectionReason) errors.push("差し戻し理由");
+  }
+  if (action === "published") {
+    if (med.review.workflowStatus !== "approved") errors.push("先に承認");
+    if (!formData.reviewer) errors.push("薬剤師監修者");
+    if (!formData.verifiedOn) errors.push("確認日");
+    if (!formData.scope) errors.push("確認範囲");
+    if (!formData.sourceRefs) errors.push("根拠資料");
+    if (!formData.note) errors.push("監修コメント");
+  }
+  return errors;
+}
+
+function buildReviewAuditEntry(med, beforeReview, afterReview, action) {
+  return {
+    recordId: med.id,
+    actor: afterReview.updatedBy || "",
+    reviewer: afterReview.reviewer || "",
+    action: action,
+    fromStatus: beforeReview.workflowStatus || "internal_candidate",
+    toStatus: afterReview.workflowStatus || "internal_candidate",
+    timestamp: afterReview.updatedAt || getNowTimestamp(),
+    version: afterReview.version || 1,
+    changedFields: getChangedReviewFields(beforeReview, afterReview),
+    summary: afterReview.rejectionReason || afterReview.note || ""
+  };
+}
+
+function refreshReviewDependentViews() {
+  syncPublicFilters();
+  renderList();
+  if (currentPage === "page-table") renderCompatTable();
+  if (currentPage === "page-saved") renderSaved();
+  if (activePopupMedId) {
+    var activeMed = medicines.find(function(item) { return item.id === activePopupMedId; });
+    if (!activeMed || !isPublicMed(activeMed)) closeMedPopup();
+    else {
+      var popupBody = document.getElementById("medPopupBody");
+      if (popupBody) popupBody.innerHTML = renderPopupContent(activeMed);
+    }
+  }
+}
+
+function handleReviewAction(action) {
+  var med = getSelectedReviewMed();
+  if (!med) return;
+  var formData = getReviewFormValues();
+  if (med.official) {
+    reviewEditorMessage = "公的資料掲載薬は参照専用です。追加薬だけが監修入力対象です。";
+    renderReviewDashboard();
+    return;
+  }
+  if (formData.formVersion && formData.formVersion !== med.review.version) {
+    reviewEditorMessage = "別タブまたは別操作で更新されています。画面を再読込して内容を確認してください。";
+    renderReviewDashboard();
+    return;
+  }
+  var errors = validateReviewAction(med, action, formData);
+  if (errors.length) {
+    reviewEditorMessage = "不足項目: " + errors.join(" / ");
+    renderReviewDashboard();
+    return;
+  }
+
+  var beforeReview = clonePlainObject(med.review);
+  var nextReview = Object.assign({}, med.review, {
+    subjectiveTastePrimary: formData.subjectiveTastePrimary,
+    subjectiveTasteSecondary: formData.subjectiveTasteSecondary,
+    subjectiveTasteAftertaste: formData.subjectiveTasteAftertaste,
+    subjectiveTasteTags: formData.subjectiveTasteTags.slice(),
+    subjectiveTasteDetail: formData.subjectiveTasteDetail,
+    subjectiveFlavorPrimary: formData.subjectiveFlavorPrimary,
+    subjectiveFlavorSecondary: formData.subjectiveFlavorSecondary,
+    subjectiveFlavorDetail: formData.subjectiveFlavorDetail,
+    subjectiveFlavor: formData.subjectiveFlavor,
+    subjectiveCaution: formData.subjectiveCaution,
+    subjectiveCompat: normalizeCompatCodes(formData.subjectiveCompat, []),
+    reviewer: formData.reviewer,
+    verifiedOn: formData.verifiedOn,
+    scope: formData.scope,
+    sourceRefs: formData.sourceRefs,
+    note: formData.note,
+    rejectionReason: formData.rejectionReason,
+    updatedBy: formData.updatedBy,
+    updatedAt: getNowTimestamp(),
+    version: med.review.version + 1
+  });
+
+  if (action === "save") {
+    nextReview.workflowStatus = "editing";
+    nextReview.verified = false;
+    nextReview.status = "pending";
+    nextReview.note = nextReview.note || "編集中";
+    nextReview.publishedOn = "";
+  } else if (action === "review_ready") {
+    nextReview.workflowStatus = "review_ready";
+    nextReview.verified = false;
+    nextReview.status = "pending";
+    nextReview.note = nextReview.note || "薬剤師確認待ち";
+    nextReview.publishedOn = "";
+  } else if (action === "approved") {
+    nextReview.workflowStatus = "approved";
+    nextReview.verified = true;
+    nextReview.status = "verified";
+    nextReview.rejectionReason = "";
+    nextReview.note = nextReview.note || "薬剤師承認済み";
+  } else if (action === "rejected") {
+    nextReview.workflowStatus = "rejected";
+    nextReview.verified = false;
+    nextReview.status = "needs_revision";
+    nextReview.publishedOn = "";
+    nextReview.note = nextReview.note || "差し戻し";
+  } else if (action === "published") {
+    nextReview.workflowStatus = "published";
+    nextReview.verified = true;
+    nextReview.status = "verified";
+    nextReview.rejectionReason = "";
+    nextReview.publishedOn = nextReview.publishedOn || getTodayIsoDate();
+    nextReview.note = nextReview.note || "公開済み";
+  }
+
+  nextReview = normalizeReviewRecord(nextReview, false);
+  persistReviewRecord(med.id, nextReview);
+  appendReviewAudit(med.id, buildReviewAuditEntry(med, beforeReview, nextReview, action));
+  reviewEditorMessage = getReviewActionLabel(action) + "を記録しました。";
+  refreshReviewDependentViews();
+  renderReviewDashboard();
+}
+
+function getReviewSheetRows() {
+  return medicines.map(function(m) {
+    var layer = m.official ? "official" : isReviewedExtension(m) ? "reviewed" : "internal";
+    return {
+      id: m.id,
+      name: getDisplayName(m),
+      generic: m.generic,
+      maker: getMakerLabel(m),
+      rawMaker: m.maker,
+      type: m.type === "kampo" ? "漢方" : "散剤",
+      categories: m.category.map(function(cat) { return catLabelMap[cat] || cat; }).join(" / "),
+      layer: layer,
+      workflowStatus: m.official ? "official_source" : m.review.workflowStatus,
+      status: getReviewStatusLabel(m),
+      statusClass: getReviewStatusClass(m),
+      verified: m.official ? "OFFICIAL_SOURCE" : m.review.verified ? "TRUE" : "FALSE",
+      verifiedOn: m.review.verifiedOn || (m.official ? officialSourceMeta.year : ""),
+      publishedOn: m.review.publishedOn || "",
+      reviewer: m.review.reviewer || "",
+      tastePrimary: m.review.subjectiveTastePrimary || "",
+      tasteSecondary: m.review.subjectiveTasteSecondary || "",
+      tasteAftertaste: m.review.subjectiveTasteAftertaste || "",
+      tasteTags: getDisplayTasteLabel(m),
+      tasteDetail: m.tasteDetail || "",
+      flavorPrimary: m.review.subjectiveFlavorPrimary || "",
+      flavorSecondary: m.review.subjectiveFlavorSecondary || "",
+      flavorDetail: m.review.subjectiveFlavorDetail || "",
+      flavor: getDisplayFlavorLabel(m),
+      compatSummary: m.official ? getCompatSummaryLabel(m.official.compat) : getCompatSummaryLabel(m.review.subjectiveCompat),
+      scope: m.review.scope || (m.official ? "NCCHD公開資料の掲載内容を構造化" : ""),
+      sourceRefs: m.review.sourceRefs || (m.official ? officialSourceMeta.url : ""),
+      note: m.review.note || (m.official ? officialSourceMeta.publisher + " " + officialSourceMeta.year : ""),
+      caution: m.caution || "",
+      rejectionReason: m.review.rejectionReason || "",
+      updatedBy: m.review.updatedBy || "",
+      updatedAt: m.review.updatedAt || "",
+      version: m.review.version || 1,
+      sortRank: getWorkflowSortRank(m)
+    };
+  });
+}
+
+function buildReviewSheetCsv() {
+  var headers = [
+    "id", "商品名", "一般名", "表示メーカー", "元メーカー表記", "剤形", "カテゴリ",
+    "レイヤー", "workflowStatus", "監修状態", "verified", "確認日", "公開日", "監修者",
+    "主な味", "副次的な味", "後味", "味タグ", "味詳細", "主な香り", "副次的な香り", "香りの詳細", "香り表示", "相性要約", "確認範囲", "根拠資料", "メモ", "差し戻し理由", "操作者", "最終更新", "version", "注意事項"
+  ];
+  var rows = getReviewSheetRows().map(function(row) {
+    return [
+      row.id, row.name, row.generic, row.maker, row.rawMaker, row.type, row.categories,
+      row.layer, row.workflowStatus, row.status, row.verified, row.verifiedOn, row.publishedOn, row.reviewer,
+      row.tastePrimary, row.tasteSecondary, row.tasteAftertaste, row.tasteTags, row.tasteDetail, row.flavorPrimary, row.flavorSecondary, row.flavorDetail, row.flavor, row.compatSummary, row.scope, row.sourceRefs, row.note, row.rejectionReason, row.updatedBy, row.updatedAt, row.version, row.caution
+    ].map(escapeCsvCell).join(",");
+  });
+  return [headers.map(escapeCsvCell).join(",")].concat(rows).join("\n");
+}
+
+function downloadReviewSheet() {
+  var csv = "\uFEFF" + buildReviewSheetCsv();
+  var blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+  var url = URL.createObjectURL(blob);
+  var link = document.createElement("a");
+  link.href = url;
+  link.download = "pharmacist-review-sheet.csv";
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+}
+
+function renderReviewRows(rows) {
+  var h = '<div class="review-table-wrap"><table class="review-table"><thead><tr>';
+  h += '<th style="min-width:78px;">監修状態</th>';
+  h += '<th style="min-width:160px;">商品名</th>';
+  h += '<th style="min-width:120px;">一般名</th>';
+  h += '<th style="min-width:80px;">剤形</th>';
+  h += '<th style="min-width:110px;">カテゴリ</th>';
+  h += '<th style="min-width:100px;">表示メーカー</th>';
+  h += '<th style="min-width:95px;">公開種別</th>';
+  h += '<th style="min-width:98px;">確認日</th>';
+  h += '<th style="min-width:110px;">監修者</th>';
+  h += '<th style="min-width:200px;">確認範囲 / 根拠</th>';
+  h += '<th style="min-width:220px;">メモ</th>';
+  h += '<th style="min-width:76px;">操作</th>';
+  h += '</tr></thead><tbody>';
+  if (!rows.length) {
+    h += '<tr><td colspan="12" style="padding:14px 12px;color:var(--text-light);">対象データはありません。</td></tr>';
+  }
+  rows.forEach(function(row) {
+    var buttonLabel = row.layer === "official" ? "参照" : "選択";
+    h += '<tr class="' + (row.id === selectedReviewId ? 'is-selected' : '') + '">';
+    h += '<td><span class="review-status-pill review-status-' + row.statusClass + '">' + escapeHtml(row.status) + '</span></td>';
+    h += '<td><strong>' + escapeHtml(row.name) + '</strong><br><span style="font-size:10px;color:var(--text-light);">' + escapeHtml(row.id) + '</span></td>';
+    h += '<td>' + escapeHtml(row.generic) + '</td>';
+    h += '<td>' + escapeHtml(row.type) + '</td>';
+    h += '<td>' + escapeHtml(row.categories) + '</td>';
+    h += '<td>' + escapeHtml(row.maker) + '</td>';
+    h += '<td>' + escapeHtml(row.layer === "official" ? "公的資料" : row.layer === "reviewed" ? "追加薬" : "内部候補") + '</td>';
+    h += '<td>' + escapeHtml(row.verifiedOn || "未入力") + '</td>';
+    h += '<td>' + escapeHtml(row.reviewer || "未入力") + '</td>';
+    h += '<td><div>' + escapeHtml(row.scope || "確認範囲未設定") + '</div><div style="margin-top:4px;font-size:11px;color:var(--text-light);">' + escapeHtml(row.sourceRefs || "根拠資料未設定") + '</div></td>';
+    h += '<td><div>' + escapeHtml(row.note || "メモなし") + '</div><div style="margin-top:4px;font-size:11px;color:var(--text-light);">' + escapeHtml(row.caution || "注意事項なし") + '</div></td>';
+    h += '<td><button type="button" class="review-select-btn" data-review-id="' + escapeHtml(row.id) + '">' + buttonLabel + '</button></td>';
+    h += '</tr>';
+  });
+  h += '</tbody></table></div>';
+  return h;
+}
+
+function renderReviewGroup(title, meta, rows) {
+  return '<section class="review-group">' +
+    '<div class="review-group-head"><div class="review-group-title">' + escapeHtml(title) + '</div><div class="review-group-meta">' + escapeHtml(meta) + '</div></div>' +
+    renderReviewRows(rows) +
+    '</section>';
+}
+
+function renderReviewDashboard() {
+  if (!reviewMode) return;
+  ensureSelectedReviewId();
+  var stats = getReviewStats();
+  var summary = document.getElementById("reviewSummary");
+  if (summary) {
+    var latestText = stats.latestVerifiedOn ? formatReviewDate(stats.latestVerifiedOn) : "未記録";
+    summary.innerHTML = '' +
+      '<div class="review-summary-card"><div class="review-summary-label">全薬データ</div><div class="review-summary-value">' + stats.total + '</div><div class="review-summary-sub">一覧・表の母数</div></div>' +
+      '<div class="review-summary-card"><div class="review-summary-label">公的資料掲載</div><div class="review-summary-value">' + stats.officialSource + '</div><div class="review-summary-sub">NCCHD公開資料由来</div></div>' +
+      '<div class="review-summary-card"><div class="review-summary-label">公開中追加</div><div class="review-summary-value">' + stats.reviewed + '</div><div class="review-summary-sub">公開画面に出る追加薬</div></div>' +
+      '<div class="review-summary-card"><div class="review-summary-label">確認待ち</div><div class="review-summary-value">' + stats.reviewReady + '</div><div class="review-summary-sub">薬剤師確認待ち</div></div>' +
+      '<div class="review-summary-card"><div class="review-summary-label">承認済み未公開</div><div class="review-summary-value">' + stats.approved + '</div><div class="review-summary-sub">承認済みだが未公開</div></div>' +
+      '<div class="review-summary-card"><div class="review-summary-label">差し戻し</div><div class="review-summary-value">' + stats.rejected + '</div><div class="review-summary-sub">要修正レコード</div></div>' +
+      '<div class="review-summary-card"><div class="review-summary-label">最新確認日</div><div class="review-summary-value" style="font-size:18px;">' + latestText + '</div><div class="review-summary-sub">追加薬の最終確認日</div></div>';
+  }
+
+  var rows = getReviewSheetRows().sort(compareReviewRows);
+  var officialRows = rows.filter(function(row) { return row.layer === "official"; });
+  var reviewedRows = rows.filter(function(row) { return row.layer === "reviewed"; });
+  var internalRows = rows.filter(function(row) { return row.layer === "internal"; });
+  var groupsHtml = "";
+  groupsHtml += renderReviewGroup("公的資料掲載", "公開中の基礎データ " + officialRows.length + "件", officialRows);
+  groupsHtml += renderReviewGroup("公開中追加", reviewedRows.length ? "承認と公開が完了した追加薬 " + reviewedRows.length + "件" : "現時点では公開中の追加薬はありません", reviewedRows);
+  groupsHtml += renderReviewGroup("内部候補", "未掲載・未監修・要修正の内部候補 " + internalRows.length + "件", internalRows);
+  document.getElementById("reviewGroups").innerHTML = groupsHtml;
+  renderReviewEditor();
+  renderReviewAudit();
+}
+
+var reviewExportBtn = document.getElementById("reviewExportBtn");
+if (reviewExportBtn) {
+  reviewExportBtn.addEventListener("click", downloadReviewSheet);
+}
+var reviewGroupsEl = document.getElementById("reviewGroups");
+if (reviewGroupsEl) {
+  reviewGroupsEl.addEventListener("click", function(e) {
+    var btn = e.target.closest(".review-select-btn");
+    if (!btn) return;
+    selectReviewRecord(btn.dataset.reviewId);
+  });
+}
+var reviewEditorEl = document.getElementById("reviewEditor");
+if (reviewEditorEl) {
+  reviewEditorEl.addEventListener("click", function(e) {
+    var btn = e.target.closest(".review-action-btn");
+    if (!btn) return;
+    handleReviewAction(btn.dataset.action);
+  });
+}
+window.addEventListener("storage", function(e) {
+  if (e.key === memoStorageKey) {
+    if (currentPage === "page-saved") renderSaved();
+    return;
+  }
+  if (e.key !== reviewRecordStorageKey && e.key !== reviewAuditStorageKey) return;
+  storedReviewRecords = getStoredReviewRecords();
+  storedReviewAuditMap = getStoredReviewAuditMap();
+  syncMedicineReviews();
+  reviewEditorMessage = "別タブの更新を反映しました。";
+  refreshReviewDependentViews();
+  if (reviewMode) renderReviewDashboard();
+});
+
+// 初期化
+if (reviewMode) {
+  var reviewNav = document.querySelector(".review-nav");
+  if (reviewNav) reviewNav.style.display = "flex";
+}
+syncMedicineReviews();
+syncPublicFilters();
+var initialSearchInput = document.getElementById("searchInput");
+if (initialSearchInput) initialSearchInput.value = "";
+renderList();
+renderSaved();
+updateStickyMetrics();
+renderCompatTable();
+if (reviewMode) renderReviewDashboard();
+if (reviewMode && window.location.hash === "#review") setCurrentPage("page-review");
+var disclaimerClose = document.getElementById("disclaimerClose");
+if (disclaimerClose) {
+  disclaimerClose.addEventListener("click", function() {
+    var disclaimerBanner = document.getElementById("disclaimerBanner");
+    if (disclaimerBanner) disclaimerBanner.classList.add("hidden");
+  });
+}
+var tableScrollWrap = document.getElementById("tableScrollWrap");
+if (tableScrollWrap) {
+  tableScrollWrap.addEventListener("scroll", syncCompatStickyHead);
+}
+window.addEventListener("resize", updateStickyMetrics);
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", function() {
+    navigator.serviceWorker.register("/sw.js").then(function(reg) {
+      console.log("SW registered:", reg.scope);
+    }).catch(function(err) {
+      console.log("SW registration failed:", err);
+    });
+  });
+}
+</script>
+</body>
+</html>
