@@ -3,11 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>こなぐすり味ナビ</title>
+<title>おくすり味ナビ</title>
 <meta name="theme-color" content="#2f8fa3">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="こなぐすりナビ">
+<meta name="apple-mobile-web-app-title" content="おくすりナビ">
 <link rel="apple-touch-icon" href="/icons/icon-192.png">
 <link rel="manifest" href="/manifest.json">
 <style>
@@ -45,7 +45,7 @@ body {
   color: var(--text);
   line-height: 1.6;
   -webkit-text-size-adjust: 100%;
-  padding-bottom: 80px;
+  padding-bottom: 112px;
 }
 
 /* ヘッダー */
@@ -642,9 +642,11 @@ body {
   font-size: 16px;
 }
 .compat-table .table-memo-textarea {
-  min-height: 56px;
-  padding: 8px 9px;
-  font-size: 12px;
+  min-height: 38px;
+  height: 38px;
+  padding: 5px 7px;
+  font-size: 11px;
+  line-height: 1.35;
   resize: none;
 }
 .compat-table tbody tr:hover td { background: var(--table-hover); }
@@ -1131,11 +1133,13 @@ body {
 
 /* 下部ナビ */
 .bottom-nav {
-  position: fixed; bottom: 0; left: 0; right: 0;
+  position: fixed; bottom: 10px; left: 12px; right: 12px;
   background: #fff; border-top: 1px solid var(--border);
   display: flex; justify-content: space-around;
-  padding: 6px 0 env(safe-area-inset-bottom, 8px);
+  padding: 8px 0 calc(env(safe-area-inset-bottom, 8px) + 10px);
   z-index: 100;
+  border-radius: 18px;
+  box-shadow: 0 10px 26px rgba(47, 65, 70, 0.14);
 }
 .nav-item {
   display: flex; flex-direction: column; align-items: center; gap: 2px;
@@ -1161,7 +1165,7 @@ body {
 <body>
 
 <div class="header">
-  <h1>こなぐすり味ナビ</h1>
+  <h1>おくすり味ナビ</h1>
   <div class="header-sub">公的資料ベースで粉薬の相性を確認</div>
 </div>
 
@@ -1618,7 +1622,7 @@ const medicines = [
   },
   {
     id: "montelukast", name: "キプレス細粒 / シングレア細粒", generic: "モンテルカスト",
-    maker: "杏林製薬 / MSD", type: "powder", category: ["allergy", "asthma"],
+    maker: "杏林製薬 / MSD", type: "powder", category: ["allergy"],
     tastes: ["plain"],
     tasteDetail: "ほぼ無味。わずかに甘い。飲みやすい。",
     generics: [
@@ -1636,7 +1640,7 @@ const medicines = [
   },
   {
     id: "pranlukast", name: "オノンドライシロップ", generic: "プランルカスト",
-    maker: "小野薬品工業", type: "powder", category: ["allergy", "asthma"],
+    maker: "小野薬品工業", type: "powder", category: ["allergy"],
     tastes: ["sweet"],
     tasteDetail: "甘いヨーグルト風味。飲みやすい。",
     generics: [
@@ -2191,7 +2195,7 @@ const medicines = [
   },
   {
     id: "cyproheptadine", name: "ペリアクチン散", generic: "シプロヘプタジン",
-    maker: "日医工", type: "powder", category: ["allergy", "cold"],
+    maker: "日医工", type: "powder", category: ["allergy"],
     tastes: ["bitter"],
     tasteDetail: "強い苦味。粉のまま飲むのは困難な子が多い。食欲増進目的でも使用。",
     generics: [],
