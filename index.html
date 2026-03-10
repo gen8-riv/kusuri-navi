@@ -674,14 +674,33 @@ body {
   padding: 0 16px 10px;
 }
 .table-mode-switch {
-  display: inline-flex;
-  gap: 6px;
-  padding: 5px;
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0;
+  width: min(100%, 360px);
+  padding: 4px;
   border-radius: 18px;
   background: linear-gradient(180deg, #fff8de 0%, #fff1c6 100%);
   border: 1px solid #f0d98a;
   align-self: flex-start;
   box-shadow: 0 6px 16px rgba(181, 151, 46, 0.14);
+  overflow: hidden;
+}
+.table-mode-switch::before {
+  content: "";
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  width: calc(50% - 4px);
+  height: calc(100% - 8px);
+  border-radius: 14px;
+  background: linear-gradient(180deg, #fffef8 0%, #ffffff 100%);
+  box-shadow: 0 3px 8px rgba(181, 151, 46, 0.2);
+  transition: transform 180ms ease;
+}
+.table-mode-switch[data-active-mode="multi"]::before {
+  transform: translateX(calc(100% + 4px));
 }
 .table-mode-btn {
   border: none;
@@ -689,17 +708,19 @@ body {
   color: #8a7a24;
   font-size: 12px;
   font-weight: 800;
-  padding: 8px 14px;
+  padding: 10px 14px;
   border-radius: 14px;
   cursor: pointer;
-  display: inline-flex;
+  display: flex;
   align-items: center;
+  justify-content: center;
   gap: 6px;
+  position: relative;
+  z-index: 1;
+  transition: color 180ms ease;
 }
 .table-mode-btn.active {
-  background: linear-gradient(180deg, #fffef8 0%, #ffffff 100%);
   color: #6f5f0f;
-  box-shadow: 0 3px 8px rgba(181, 151, 46, 0.2);
 }
 .table-mode-btn-icon {
   font-size: 14px;
@@ -800,7 +821,7 @@ body {
   align-items: center;
   justify-content: space-between;
   gap: 10px;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 }
 .aggregate-group-toggle {
   border: none;
@@ -817,28 +838,38 @@ body {
 .aggregate-group.bad .aggregate-group-title { color: #c44b45; }
 .aggregate-list {
   display: grid;
-  gap: 8px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
 }
 .aggregate-item {
   border-radius: 12px;
-  padding: 9px 10px;
+  padding: 8px;
   background: rgba(255,255,255,0.88);
+  min-width: 0;
 }
 .aggregate-item-head {
   display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 12px;
+  align-items: flex-start;
+  gap: 6px;
+  min-width: 0;
+  font-size: 11px;
   font-weight: 800;
   color: var(--text);
+  line-height: 1.35;
 }
 .aggregate-item-icon {
   font-size: 14px;
   line-height: 1;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+.aggregate-item-name {
+  min-width: 0;
+  word-break: break-word;
 }
 .aggregate-item-note {
-  margin-top: 4px;
-  font-size: 11px;
+  margin-top: 3px;
+  font-size: 10px;
   color: var(--text-light);
   line-height: 1.5;
 }
@@ -1356,6 +1387,36 @@ body {
 .page { display: none; }
 .page.active { display: block; }
 
+@media (max-width: 480px) {
+  .table-mode-switch {
+    width: 100%;
+  }
+  .table-mode-btn {
+    padding: 10px 8px;
+    font-size: 11px;
+    gap: 4px;
+  }
+  .table-mode-btn-icon {
+    font-size: 13px;
+  }
+  .aggregate-group {
+    padding: 10px;
+  }
+  .aggregate-item {
+    padding: 7px 6px;
+  }
+  .aggregate-item-head {
+    font-size: 10px;
+    gap: 5px;
+  }
+  .aggregate-item-icon {
+    font-size: 12px;
+  }
+  .aggregate-item-note {
+    font-size: 9px;
+  }
+}
+
 @media (min-width: 600px) {
   .card-list { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
   .cat-section-header { grid-column: 1 / -1; }
@@ -1436,7 +1497,7 @@ body {
   <div class="review-note" id="tableReviewNote"></div>
   <div class="table-filter-tabs" id="tableFilterTabs"></div>
   <div class="table-tools">
-    <div class="table-mode-switch" id="tableModeSwitch">
+    <div class="table-mode-switch" id="tableModeSwitch" data-active-mode="single">
       <button type="button" class="table-mode-btn active" data-table-mode="single"><span class="table-mode-btn-icon">📋</span><span>単剤表示</span></button>
       <button type="button" class="table-mode-btn" data-table-mode="multi"><span class="table-mode-btn-icon">🧪</span><span>複数薬まとめ</span></button>
     </div>
@@ -4099,6 +4160,7 @@ function getTableMeds() {
 function renderTableModeSwitch() {
   var container = document.getElementById("tableModeSwitch");
   if (!container) return;
+  container.dataset.activeMode = currentTableMode;
   container.querySelectorAll(".table-mode-btn").forEach(function(btn) {
     btn.classList.toggle("active", btn.dataset.tableMode === currentTableMode);
   });
@@ -4201,7 +4263,7 @@ function renderAggregateGroup(key, title, items, emptyText) {
     h += '<div class="aggregate-list">';
     items.forEach(function(item) {
       h += '<div class="aggregate-item">';
-      h += '<div class="aggregate-item-head"><span class="aggregate-item-icon">' + item.icon + '</span><span>' + item.name + '</span></div>';
+      h += '<div class="aggregate-item-head"><span class="aggregate-item-icon">' + item.icon + '</span><span class="aggregate-item-name">' + item.name + '</span></div>';
       h += '<div class="aggregate-item-note' + (isExpanded ? '' : ' is-collapsed') + '">' + item.note + '</div>';
       h += '</div>';
     });
