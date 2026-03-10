@@ -782,9 +782,23 @@ body {
   gap: 10px;
 }
 .aggregate-selector-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   font-size: 12px;
   font-weight: 800;
   color: var(--text);
+}
+.aggregate-title-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #ecf6f8;
+  font-size: 11px;
+  line-height: 1;
 }
 .aggregate-selector-sub {
   margin-top: 2px;
@@ -866,6 +880,9 @@ body {
   gap: 10px;
 }
 .aggregate-results-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   font-size: 13px;
   font-weight: 800;
   color: var(--primary-dark);
@@ -902,6 +919,12 @@ body {
   flex-wrap: wrap;
   gap: 6px;
   margin-top: 10px;
+}
+.aggregate-selected-label {
+  margin-top: 10px;
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--primary-dark);
 }
 .aggregate-selected-pill {
   display: inline-flex;
@@ -4407,7 +4430,7 @@ function renderAggregateMedSelector(filteredMeds) {
   });
   var h = '<div class="aggregate-selector">';
   h += '<div class="aggregate-selector-head">';
-  h += '<div><div class="aggregate-selector-title">薬を選ぶ</div><div class="aggregate-selector-sub">処方に入っている薬をタップして選択します。共通候補だけを先に見て、必要な時だけ下の個別表で確認できます。</div></div>';
+  h += '<div><div class="aggregate-selector-title"><span class="aggregate-title-icon" aria-hidden="true">🗒️</span><span>今回の処方に入っている薬</span></div><div class="aggregate-selector-sub">この子に出ている処方薬をタップして選びます。共通候補だけを先に見て、必要な時だけ下の個別表で確認できます。</div></div>';
   h += '</div>';
   h += '<div class="aggregate-chip-groups">';
   order.forEach(function(label) {
@@ -4502,20 +4525,21 @@ function renderAggregateGroup(key, title, items, emptyText) {
 function renderAggregateResultsPanel(selectedMeds) {
   var h = '<div class="aggregate-results-panel" id="aggregateResultsPanel">';
   h += '<div class="aggregate-results-head">';
-  h += '<div><div class="aggregate-results-title">処方のまとめ結果</div>';
+  h += '<div><div class="aggregate-results-title"><span class="aggregate-title-icon" aria-hidden="true">🧒</span><span>今回の処方で飲ませやすい候補</span></div>';
   if (selectedMeds.length >= 2) {
-    h += '<div class="aggregate-results-sub">' + selectedMeds.length + '剤に共通する候補をすぐ確認できます。</div>';
+    h += '<div class="aggregate-results-sub">' + selectedMeds.length + '剤に共通する候補を、今回の処方に合わせてすぐ確認できます。</div>';
   } else {
-    h += '<div class="aggregate-results-sub">結果はここに表示されます。まずは薬を2剤以上選んでください。</div>';
+    h += '<div class="aggregate-results-sub">結果はここに表示されます。まずは今回の処方薬を2剤以上選んでください。</div>';
   }
   h += '</div>';
   h += '<div class="aggregate-results-badge">' + (selectedMeds.length >= 2 ? '結果を更新済み' : '選択待ち') + '</div>';
   h += '</div>';
   if (selectedMeds.length < 2) {
-    h += '<div class="aggregate-results-placeholder">あと' + (2 - selectedMeds.length) + '剤選ぶと、共通して飲みやすい候補・まあまあな候補・NG候補がここにまとまって表示されます。</div>';
+    h += '<div class="aggregate-results-placeholder">あと' + (2 - selectedMeds.length) + '剤選ぶと、この子の処方で共通して飲みやすい候補・まあまあな候補・NG候補がここにまとまって表示されます。</div>';
     h += '</div>';
     return h;
   }
+  h += '<div class="aggregate-selected-label">今回の処方薬</div>';
   h += '<div class="aggregate-selected-list">';
   selectedMeds.forEach(function(med) {
     h += '<span class="aggregate-selected-pill">' + escapeHtml(getDisplayName(med)) + '<button type="button" class="aggregate-pill-remove" data-remove-selected-id="' + escapeHtml(med.id) + '" aria-label="' + escapeHtml(getDisplayName(med)) + 'を選択解除">×</button></span>';
