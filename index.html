@@ -765,6 +765,83 @@ body {
   cursor: pointer;
   flex-shrink: 0;
 }
+.aggregate-selector {
+  margin-top: 12px;
+  padding: 12px;
+  border-radius: 14px;
+  background: #f7fbfb;
+  border: 1px solid #dfedef;
+}
+.aggregate-selector-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+.aggregate-selector-title {
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--text);
+}
+.aggregate-selector-sub {
+  margin-top: 2px;
+  font-size: 11px;
+  color: var(--text-light);
+  line-height: 1.5;
+}
+.aggregate-chip-groups {
+  display: grid;
+  gap: 10px;
+  margin-top: 10px;
+}
+.aggregate-chip-group-label {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  color: var(--primary-dark);
+  text-transform: uppercase;
+}
+.aggregate-chip-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 6px;
+}
+.aggregate-med-chip {
+  border: 1px solid #d8e8eb;
+  background: #fff;
+  color: var(--text);
+  border-radius: 999px;
+  padding: 8px 11px;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.2;
+  cursor: pointer;
+  transition: background 160ms ease, border-color 160ms ease, color 160ms ease, box-shadow 160ms ease;
+}
+.aggregate-med-chip.is-selected {
+  background: linear-gradient(180deg, #eff9fb 0%, #e2f3f6 100%);
+  border-color: #9dd0d8;
+  color: var(--primary-dark);
+  box-shadow: 0 2px 7px rgba(47, 143, 163, 0.12);
+}
+.aggregate-med-chip-check {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  margin-right: 6px;
+  border-radius: 50%;
+  background: #edf4f5;
+  color: #91a7ae;
+  font-size: 10px;
+  line-height: 1;
+}
+.aggregate-med-chip.is-selected .aggregate-med-chip-check {
+  background: var(--primary);
+  color: #fff;
+}
 .aggregate-selected-list {
   display: flex;
   flex-wrap: wrap;
@@ -790,6 +867,29 @@ body {
   line-height: 1;
   padding: 0;
   cursor: pointer;
+}
+.aggregate-table-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 12px;
+}
+.aggregate-table-note {
+  font-size: 11px;
+  color: var(--text-light);
+  line-height: 1.5;
+}
+.aggregate-table-toggle {
+  border: 1px solid #cfe2e6;
+  background: #fff;
+  color: var(--primary-dark);
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 800;
+  padding: 7px 11px;
+  cursor: pointer;
+  flex-shrink: 0;
 }
 .aggregate-groups {
   display: grid;
@@ -881,17 +981,17 @@ body {
   color: var(--text-light);
   line-height: 1.6;
 }
-.table-select-wrap {
+.table-selected-mark {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  min-width: 0;
-}
-.table-select-checkbox {
-  width: 16px;
-  height: 16px;
-  accent-color: var(--primary);
-  flex-shrink: 0;
+  margin-left: 6px;
+  padding: 2px 6px;
+  border-radius: 999px;
+  background: #e7f4f7;
+  color: var(--primary-dark);
+  font-size: 10px;
+  font-weight: 800;
+  line-height: 1;
 }
 .compat-table tbody tr.is-selected td {
   background: #eef8fa;
@@ -1401,6 +1501,18 @@ body {
   }
   .aggregate-group {
     padding: 10px;
+  }
+  .aggregate-selector {
+    padding: 10px;
+  }
+  .aggregate-selector-head,
+  .aggregate-table-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .aggregate-med-chip {
+    padding: 8px 10px;
+    font-size: 11px;
   }
   .aggregate-item {
     padding: 7px 6px;
@@ -4151,6 +4263,7 @@ var currentTableFilter = "all";
 var currentTableMode = "single";
 var selectedTableMedIds = [];
 var aggregateDetailState = { good: false, ok: false, bad: false };
+var showTableDetailInMulti = false;
 
 function getTableMeds() {
   var list = getPublicMedicines();
@@ -4196,6 +4309,36 @@ function getCompatEntryMap(med) {
     if (!map[name]) map[name] = { code: "N", note: "データなし" };
   });
   return map;
+}
+
+function renderAggregateMedSelector(filteredMeds) {
+  var groups = {};
+  var order = [];
+  filteredMeds.forEach(function(med) {
+    var label = getCatLabel(med);
+    if (!groups[label]) {
+      groups[label] = [];
+      order.push(label);
+    }
+    groups[label].push(med);
+  });
+  var h = '<div class="aggregate-selector">';
+  h += '<div class="aggregate-selector-head">';
+  h += '<div><div class="aggregate-selector-title">薬を選ぶ</div><div class="aggregate-selector-sub">処方に入っている薬をタップして選択します。共通候補だけを先に見て、必要な時だけ下の個別表で確認できます。</div></div>';
+  h += '</div>';
+  h += '<div class="aggregate-chip-groups">';
+  order.forEach(function(label) {
+    h += '<div class="aggregate-chip-group">';
+    h += '<div class="aggregate-chip-group-label">' + escapeHtml(label) + '</div>';
+    h += '<div class="aggregate-chip-list">';
+    groups[label].forEach(function(med) {
+      var isSelected = selectedTableMedIds.indexOf(med.id) !== -1;
+      h += '<button type="button" class="aggregate-med-chip' + (isSelected ? ' is-selected' : '') + '" data-select-chip-id="' + escapeHtml(med.id) + '" aria-pressed="' + (isSelected ? 'true' : 'false') + '"><span class="aggregate-med-chip-check">' + (isSelected ? '✓' : '＋') + '</span><span>' + escapeHtml(getDisplayName(med)) + '</span></button>';
+    });
+    h += '</div></div>';
+  });
+  h += '</div></div>';
+  return h;
 }
 
 function buildAggregateCompatSummary(meds) {
@@ -4286,13 +4429,14 @@ function renderTableAggregateSummary(filteredMeds) {
   var h = '<div class="aggregate-summary-head">';
   h += '<div><div class="aggregate-summary-title">複数薬まとめ</div>';
   if (selectedMeds.length < 2) {
-    h += '<div class="aggregate-summary-sub">薬名左のチェックで2剤以上選ぶと、処方に共通する候補をまとめます。</div>';
+    h += '<div class="aggregate-summary-sub">2剤以上を選ぶと、処方に共通する候補を上でまとめます。</div>';
   } else {
     h += '<div class="aggregate-summary-sub">' + selectedMeds.length + '剤に共通する候補を、資料上の相性から集計しています。</div>';
   }
   h += '</div>';
   h += '<button type="button" class="aggregate-summary-clear" id="clearTableSelectionsBtn">選択解除</button>';
   h += '</div>';
+  h += renderAggregateMedSelector(filteredMeds);
   if (selectedMeds.length) {
     h += '<div class="aggregate-selected-list">';
     selectedMeds.forEach(function(med) {
@@ -4308,6 +4452,10 @@ function renderTableAggregateSummary(filteredMeds) {
     h += renderAggregateGroup("bad", '⚠ いずれかでNG', summary.bad, "選択中の薬で明確なNG食品はありません。");
     h += '</div>';
   }
+  h += '<div class="aggregate-table-actions">';
+  h += '<div class="aggregate-table-note">個別の行列表は確認用です。共通候補の判断は上の集計を優先してください。</div>';
+  h += '<button type="button" class="aggregate-table-toggle" id="toggleMultiTableBtn">' + (showTableDetailInMulti ? '個別表を隠す' : '個別表で確認する') + '</button>';
+  h += '</div>';
   container.innerHTML = h;
   container.classList.add("is-active");
 }
@@ -4334,6 +4482,15 @@ function closeMedPopup() {
   document.body.style.overflow = "";
 }
 
+function syncTableDetailVisibility() {
+  var stickyHead = document.getElementById("compatStickyHead");
+  var wrap = document.getElementById("tableScrollWrap");
+  if (!stickyHead || !wrap) return;
+  var shouldShow = currentTableMode !== "multi" || showTableDetailInMulti;
+  stickyHead.style.display = shouldShow ? "" : "none";
+  wrap.style.display = shouldShow ? "" : "none";
+}
+
 function renderCompatTable() {
   var filtered = getTableMeds();
   var totalPublic = getPublicMedicines().length;
@@ -4353,7 +4510,7 @@ function renderCompatTable() {
   });
 
   headHtml += '<th class="cat-head" style="min-width:28px;">\u7A2E\u985E</th>';
-  headHtml += '<th class="name-cell" style="background:linear-gradient(180deg, var(--table-head-bg) 0%, var(--primary) 100%);color:#fff;">' + (currentTableMode === "multi" ? "\u9078\u629E\u30FB\u5546\u54C1\u540D" : "\u5546\u54C1\u540D") + '</th>';
+  headHtml += '<th class="name-cell" style="background:linear-gradient(180deg, var(--table-head-bg) 0%, var(--primary) 100%);color:#fff;">\u5546\u54C1\u540D</th>';
   headHtml += '<th class="fav-col">お気に入り</th>';
   headHtml += '<th style="min-width:50px;">\u5473</th>';
   headHtml += '<th style="min-width:50px;">\u9999\u308A</th>';
@@ -4366,6 +4523,7 @@ function renderCompatTable() {
     document.getElementById("compatTable").innerHTML = headHtml + bodyHtml;
     document.getElementById("compatStickyHead").innerHTML = '<table class="compat-table">' + headHtml + '</table>';
     syncCompatStickyHead();
+    syncTableDetailVisibility();
     document.getElementById("tableCount").textContent = buildPublicCountText(0, totalPublic);
     renderTableAggregateSummary(filtered);
     updatePublicReviewNotes();
@@ -4391,11 +4549,7 @@ function renderCompatTable() {
         bodyHtml += '<td class="cat-cell" rowspan="' + meds.length + '">' + cl + '</td>';
       }
       var faved = isFav(m.id);
-      if (currentTableMode === "multi") {
-        bodyHtml += '<td class="name-cell"><div class="table-select-wrap"><input class="table-select-checkbox" type="checkbox" data-select-med-id="' + escapeHtml(m.id) + '" aria-label="' + escapeHtml(getDisplayName(m)) + 'をまとめ対象に追加" ' + (isSelected ? 'checked' : '') + '><button type="button" data-med-id="' + escapeHtml(m.id) + '">' + escapeHtml(getDisplayName(m)) + '</button></div></td>';
-      } else {
-        bodyHtml += '<td class="name-cell"><button type="button" data-med-id="' + escapeHtml(m.id) + '">' + escapeHtml(getDisplayName(m)) + '</button></td>';
-      }
+      bodyHtml += '<td class="name-cell"><button type="button" data-med-id="' + escapeHtml(m.id) + '">' + escapeHtml(getDisplayName(m)) + '</button>' + (currentTableMode === "multi" && isSelected ? '<span class="table-selected-mark">選択中</span>' : '') + '</td>';
       bodyHtml += '<td class="fav-cell"><button class="fav-btn table-fav-btn ' + (faved ? "active" : "") + '" data-fav-id="' + m.id + '" aria-label="お気に入り" onclick="handleFav(event,\'' + m.id + '\')">' + getFavIcon(faved) + '</button></td>';
       bodyHtml += '<td class="taste-cell">' + getTasteLabel(m) + '</td>';
       bodyHtml += '<td class="flavor-cell">' + getDisplayFlavorLabel(m) + '</td>';
@@ -4409,6 +4563,7 @@ function renderCompatTable() {
   document.getElementById("compatTable").innerHTML = headHtml + bodyHtml;
   document.getElementById("compatStickyHead").innerHTML = '<table class="compat-table">' + headHtml + '</table>';
   syncCompatStickyHead();
+  syncTableDetailVisibility();
   document.getElementById("tableCount").textContent = buildPublicCountText(filtered.length, totalPublic) + (currentTableMode === "multi" && selectedTableMedIds.length ? ' / 選択 ' + selectedTableMedIds.length + '剤' : '');
   renderTableAggregateSummary(filtered);
   updatePublicReviewNotes();
@@ -4418,6 +4573,7 @@ document.getElementById("tableModeSwitch").addEventListener("click", function(e)
   var btn = e.target.closest(".table-mode-btn");
   if (!btn) return;
   currentTableMode = btn.dataset.tableMode;
+  showTableDetailInMulti = false;
   if (currentTableMode !== "multi") clearTableSelections();
   renderCompatTable();
 });
@@ -4428,6 +4584,7 @@ document.getElementById("tableFilterTabs").addEventListener("click", function(e)
   document.querySelectorAll("#tableFilterTabs .filter-tab").forEach(function(t) { t.classList.remove("active"); });
   tab.classList.add("active");
   currentTableFilter = tab.dataset.tfilter;
+  showTableDetailInMulti = false;
   clearTableSelections();
   renderCompatTable();
 });
@@ -4438,14 +4595,15 @@ document.getElementById("compatTable").addEventListener("click", function(e) {
   openMedPopup(btn.dataset.medId);
 });
 
-document.getElementById("compatTable").addEventListener("change", function(e) {
-  var checkbox = e.target.closest(".table-select-checkbox");
-  if (!checkbox) return;
-  toggleTableSelection(checkbox.dataset.selectMedId, checkbox.checked);
-  renderCompatTable();
-});
-
 document.getElementById("tableAggregateSummary").addEventListener("click", function(e) {
+  var chipBtn = e.target.closest("[data-select-chip-id]");
+  if (chipBtn) {
+    var medId = chipBtn.dataset.selectChipId;
+    var willSelect = selectedTableMedIds.indexOf(medId) === -1;
+    toggleTableSelection(medId, willSelect);
+    renderCompatTable();
+    return;
+  }
   var removeBtn = e.target.closest("[data-remove-selected-id]");
   if (removeBtn) {
     toggleTableSelection(removeBtn.dataset.removeSelectedId, false);
@@ -4456,6 +4614,12 @@ document.getElementById("tableAggregateSummary").addEventListener("click", funct
   if (toggleBtn) {
     var key = toggleBtn.dataset.aggregateToggle;
     aggregateDetailState[key] = !aggregateDetailState[key];
+    renderCompatTable();
+    return;
+  }
+  var detailBtn = e.target.closest("#toggleMultiTableBtn");
+  if (detailBtn) {
+    showTableDetailInMulti = !showTableDetailInMulti;
     renderCompatTable();
     return;
   }
