@@ -676,26 +676,34 @@ body {
 .table-mode-switch {
   display: inline-flex;
   gap: 6px;
-  padding: 4px;
-  border-radius: 999px;
-  background: #eef7f8;
-  border: 1px solid #dcecee;
+  padding: 5px;
+  border-radius: 18px;
+  background: linear-gradient(180deg, #fff8de 0%, #fff1c6 100%);
+  border: 1px solid #f0d98a;
   align-self: flex-start;
+  box-shadow: 0 6px 16px rgba(181, 151, 46, 0.14);
 }
 .table-mode-btn {
   border: none;
   background: transparent;
-  color: var(--text-light);
+  color: #8a7a24;
   font-size: 12px;
-  font-weight: 700;
-  padding: 6px 12px;
-  border-radius: 999px;
+  font-weight: 800;
+  padding: 8px 14px;
+  border-radius: 14px;
   cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 }
 .table-mode-btn.active {
-  background: #fff;
-  color: var(--primary);
-  box-shadow: 0 1px 3px rgba(47, 143, 163, 0.18);
+  background: linear-gradient(180deg, #fffef8 0%, #ffffff 100%);
+  color: #6f5f0f;
+  box-shadow: 0 3px 8px rgba(181, 151, 46, 0.2);
+}
+.table-mode-btn-icon {
+  font-size: 14px;
+  line-height: 1;
 }
 .table-aggregate-summary {
   display: none;
@@ -746,12 +754,21 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 5px 10px;
+  padding: 5px 8px 5px 10px;
   border-radius: 999px;
   background: #eef7f8;
   color: var(--primary-dark);
   font-size: 11px;
   font-weight: 700;
+}
+.aggregate-pill-remove {
+  border: none;
+  background: transparent;
+  color: #7aa4ad;
+  font-size: 13px;
+  line-height: 1;
+  padding: 0;
+  cursor: pointer;
 }
 .aggregate-groups {
   display: grid;
@@ -777,7 +794,23 @@ body {
 .aggregate-group-title {
   font-size: 12px;
   font-weight: 800;
+}
+.aggregate-group-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
   margin-bottom: 8px;
+}
+.aggregate-group-toggle {
+  border: none;
+  background: rgba(255,255,255,0.88);
+  color: var(--text-light);
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 800;
+  padding: 4px 8px;
+  cursor: pointer;
 }
 .aggregate-group.good .aggregate-group-title { color: #24794d; }
 .aggregate-group.ok .aggregate-group-title { color: #5d6b75; }
@@ -808,6 +841,9 @@ body {
   font-size: 11px;
   color: var(--text-light);
   line-height: 1.5;
+}
+.aggregate-item-note.is-collapsed {
+  display: none;
 }
 .aggregate-empty {
   font-size: 11px;
@@ -1401,8 +1437,8 @@ body {
   <div class="table-filter-tabs" id="tableFilterTabs"></div>
   <div class="table-tools">
     <div class="table-mode-switch" id="tableModeSwitch">
-      <button type="button" class="table-mode-btn active" data-table-mode="single">単剤表示</button>
-      <button type="button" class="table-mode-btn" data-table-mode="multi">複数薬まとめ</button>
+      <button type="button" class="table-mode-btn active" data-table-mode="single"><span class="table-mode-btn-icon">📋</span><span>単剤表示</span></button>
+      <button type="button" class="table-mode-btn" data-table-mode="multi"><span class="table-mode-btn-icon">🧪</span><span>複数薬まとめ</span></button>
     </div>
     <div class="table-aggregate-summary" id="tableAggregateSummary"></div>
   </div>
@@ -3507,7 +3543,7 @@ function getCompatEntries(med) {
       var item = {
         name: name,
         icon: officialFoodIcons[name] || "\u2022",
-        note: code === "G" ? "資料上: 飲みやすい" : code === "O" ? "資料上: 変わらない" : code === "B" ? "資料上: 飲みにくい" : "資料上: データなし"
+        note: code === "G" ? "飲みやすい" : code === "O" ? "変わらない" : code === "B" ? "飲みにくい" : "データなし"
       };
       if (code === "G") entries.good.push(item);
       else if (code === "O") entries.ok.push(item);
@@ -3530,9 +3566,9 @@ function renderCompatSummary(med) {
       h += '<span class="summary-pick"><span class="summary-pick-icon">' + item.icon + '</span>' + item.name + '</span>';
     });
   } else if (compatEntries.ok.length) {
-    h += '<div class="summary-note"><strong>資料上:</strong> ' + compatEntries.ok[0].name + ' は大きな変化なし</div>';
+    h += '<div class="summary-note">' + compatEntries.ok[0].name + ' は大きな変化なし</div>';
   } else {
-    h += '<div class="summary-note"><strong>資料上:</strong> 飲みやすい組み合わせの記載はありません</div>';
+    h += '<div class="summary-note">飲みやすい組み合わせの記載はありません</div>';
   }
   if (badItems.length) {
     h += '<span class="summary-break" aria-hidden="true"></span>';
@@ -4053,6 +4089,7 @@ function getCatLabel(med) {
 var currentTableFilter = "all";
 var currentTableMode = "single";
 var selectedTableMedIds = [];
+var aggregateDetailState = { good: false, ok: false, bad: false };
 
 function getTableMeds() {
   var list = getPublicMedicines();
@@ -4094,7 +4131,7 @@ function getCompatEntryMap(med) {
   entries.bad.forEach(function(item) { map[item.name] = { code: "B", note: item.note }; });
   entries.none.forEach(function(item) { map[item.name] = { code: "N", note: item.note }; });
   foodCols.forEach(function(name) {
-    if (!map[name]) map[name] = { code: "N", note: "資料上: データなし" };
+    if (!map[name]) map[name] = { code: "N", note: "データなし" };
   });
   return map;
 }
@@ -4150,8 +4187,14 @@ function buildAggregateCompatSummary(meds) {
 }
 
 function renderAggregateGroup(key, title, items, emptyText) {
+  var isExpanded = !!aggregateDetailState[key];
   var h = '<div class="aggregate-group ' + key + '">';
+  h += '<div class="aggregate-group-head">';
   h += '<div class="aggregate-group-title">' + title + '</div>';
+  if (items.length) {
+    h += '<button type="button" class="aggregate-group-toggle" data-aggregate-toggle="' + key + '">' + (isExpanded ? '詳細を隠す' : '詳細を表示') + '</button>';
+  }
+  h += '</div>';
   if (!items.length) {
     h += '<div class="aggregate-empty">' + emptyText + '</div>';
   } else {
@@ -4159,7 +4202,7 @@ function renderAggregateGroup(key, title, items, emptyText) {
     items.forEach(function(item) {
       h += '<div class="aggregate-item">';
       h += '<div class="aggregate-item-head"><span class="aggregate-item-icon">' + item.icon + '</span><span>' + item.name + '</span></div>';
-      h += '<div class="aggregate-item-note">' + item.note + '</div>';
+      h += '<div class="aggregate-item-note' + (isExpanded ? '' : ' is-collapsed') + '">' + item.note + '</div>';
       h += '</div>';
     });
     h += '</div>';
@@ -4191,7 +4234,7 @@ function renderTableAggregateSummary(filteredMeds) {
   if (selectedMeds.length) {
     h += '<div class="aggregate-selected-list">';
     selectedMeds.forEach(function(med) {
-      h += '<span class="aggregate-selected-pill">' + escapeHtml(getDisplayName(med)) + '</span>';
+      h += '<span class="aggregate-selected-pill">' + escapeHtml(getDisplayName(med)) + '<button type="button" class="aggregate-pill-remove" data-remove-selected-id="' + escapeHtml(med.id) + '" aria-label="' + escapeHtml(getDisplayName(med)) + 'を選択解除">×</button></span>';
     });
     h += '</div>';
   }
@@ -4341,6 +4384,19 @@ document.getElementById("compatTable").addEventListener("change", function(e) {
 });
 
 document.getElementById("tableAggregateSummary").addEventListener("click", function(e) {
+  var removeBtn = e.target.closest("[data-remove-selected-id]");
+  if (removeBtn) {
+    toggleTableSelection(removeBtn.dataset.removeSelectedId, false);
+    renderCompatTable();
+    return;
+  }
+  var toggleBtn = e.target.closest("[data-aggregate-toggle]");
+  if (toggleBtn) {
+    var key = toggleBtn.dataset.aggregateToggle;
+    aggregateDetailState[key] = !aggregateDetailState[key];
+    renderCompatTable();
+    return;
+  }
   var clearBtn = e.target.closest("#clearTableSelectionsBtn");
   if (!clearBtn) return;
   clearTableSelections();
