@@ -1611,7 +1611,7 @@ body {
   <div class="table-tools">
     <div class="table-mode-switch" id="tableModeSwitch" data-active-mode="single">
       <button type="button" class="table-mode-btn active" data-table-mode="single"><span class="table-mode-btn-icon">📋</span><span>単剤表示</span></button>
-      <button type="button" class="table-mode-btn" data-table-mode="multi"><span class="table-mode-btn-icon">🧪</span><span>複数薬まとめ</span></button>
+      <button type="button" class="table-mode-btn" data-table-mode="multi"><span class="table-mode-btn-icon">💊</span><span>複数薬まとめ</span></button>
     </div>
     <div class="table-aggregate-summary" id="tableAggregateSummary"></div>
   </div>
@@ -3601,7 +3601,17 @@ function updateStickyMetrics() {
   var searchHeight = searchArea ? Math.ceil(searchArea.getBoundingClientRect().height) : 56;
   document.documentElement.style.setProperty("--header-height", headerHeight + "px");
   document.documentElement.style.setProperty("--list-sticky-height", (headerHeight + searchHeight) + "px");
+  scheduleCompatStickySync();
+}
+function scheduleCompatStickySync() {
   syncCompatStickyHead();
+  if (typeof window.requestAnimationFrame === "function") {
+    window.requestAnimationFrame(function() {
+      syncCompatStickyHead();
+      window.requestAnimationFrame(syncCompatStickyHead);
+    });
+  }
+  setTimeout(syncCompatStickyHead, 0);
 }
 function syncCompatStickyHead() {
   var wrap = document.getElementById("tableScrollWrap");
@@ -4144,7 +4154,7 @@ function resetPageScroll(page) {
       tableWrap.scrollTop = 0;
       if (page === "page-table") tableWrap.scrollLeft = 0;
     }
-    if (page === "page-table") syncCompatStickyHead();
+    if (page === "page-table") scheduleCompatStickySync();
   }
   apply();
   if (typeof window.requestAnimationFrame === "function") {
@@ -4489,6 +4499,7 @@ function syncTableDetailVisibility() {
   var shouldShow = currentTableMode !== "multi" || showTableDetailInMulti;
   stickyHead.style.display = shouldShow ? "" : "none";
   wrap.style.display = shouldShow ? "" : "none";
+  if (shouldShow) scheduleCompatStickySync();
 }
 
 function renderCompatTable() {
@@ -4522,7 +4533,7 @@ function renderCompatTable() {
     bodyHtml += '<tr><td colspan="' + columnCount + '" style="padding:16px 12px;text-align:left;color:var(--text-light);">公開資料に掲載された相性データがまだ公開されていません。</td></tr></tbody>';
     document.getElementById("compatTable").innerHTML = headHtml + bodyHtml;
     document.getElementById("compatStickyHead").innerHTML = '<table class="compat-table">' + headHtml + '</table>';
-    syncCompatStickyHead();
+    scheduleCompatStickySync();
     syncTableDetailVisibility();
     document.getElementById("tableCount").textContent = buildPublicCountText(0, totalPublic);
     renderTableAggregateSummary(filtered);
@@ -4562,7 +4573,7 @@ function renderCompatTable() {
   bodyHtml += "</tbody>";
   document.getElementById("compatTable").innerHTML = headHtml + bodyHtml;
   document.getElementById("compatStickyHead").innerHTML = '<table class="compat-table">' + headHtml + '</table>';
-  syncCompatStickyHead();
+  scheduleCompatStickySync();
   syncTableDetailVisibility();
   document.getElementById("tableCount").textContent = buildPublicCountText(filtered.length, totalPublic) + (currentTableMode === "multi" && selectedTableMedIds.length ? ' / 選択 ' + selectedTableMedIds.length + '剤' : '');
   renderTableAggregateSummary(filtered);
