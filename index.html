@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>おくすり味ナビ</title>
+<meta name="application-name" content="おくすり味ナビ">
 <meta name="theme-color" content="#2f8fa3">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -4648,6 +4649,9 @@ window.addEventListener("storage", function(e) {
 });
 
 // 初期化
+if (document.title !== "おくすり味ナビ") {
+  document.title = "おくすり味ナビ";
+}
 if (reviewMode) {
   var reviewNav = document.querySelector(".review-nav");
   if (reviewNav) reviewNav.style.display = "flex";
