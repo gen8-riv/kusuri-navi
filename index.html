@@ -765,8 +765,11 @@ body {
   cursor: pointer;
   flex-shrink: 0;
 }
+.aggregate-summary-shell {
+  display: grid;
+  gap: 12px;
+}
 .aggregate-selector {
-  margin-top: 12px;
   padding: 12px;
   border-radius: 14px;
   background: #f7fbfb;
@@ -841,6 +844,58 @@ body {
 .aggregate-med-chip.is-selected .aggregate-med-chip-check {
   background: var(--primary);
   color: #fff;
+}
+.aggregate-results-panel {
+  border-radius: 16px;
+  padding: 14px;
+  background: linear-gradient(180deg, #ffffff 0%, #f6fbfc 100%);
+  border: 1px solid #cfe4e8;
+  box-shadow: 0 8px 20px rgba(47, 143, 163, 0.1);
+}
+.aggregate-results-panel.is-updated {
+  animation: aggregatePulse 720ms ease;
+}
+@keyframes aggregatePulse {
+  0% { box-shadow: 0 0 0 0 rgba(47, 143, 163, 0.24); }
+  100% { box-shadow: 0 8px 20px rgba(47, 143, 163, 0.1); }
+}
+.aggregate-results-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+.aggregate-results-title {
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--primary-dark);
+}
+.aggregate-results-sub {
+  margin-top: 2px;
+  font-size: 11px;
+  color: var(--text-light);
+  line-height: 1.5;
+}
+.aggregate-results-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 9px;
+  border-radius: 999px;
+  background: #edf7f9;
+  color: var(--primary-dark);
+  font-size: 10px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+.aggregate-results-placeholder {
+  margin-top: 10px;
+  padding: 12px;
+  border-radius: 12px;
+  background: #fbfdfd;
+  border: 1px dashed #d6e7ea;
+  font-size: 12px;
+  color: var(--text-light);
+  line-height: 1.6;
 }
 .aggregate-selected-list {
   display: flex;
@@ -984,13 +1039,28 @@ body {
 .table-selected-mark {
   display: inline-flex;
   align-items: center;
+  gap: 4px;
   margin-left: 6px;
-  padding: 2px 6px;
+  padding: 3px 8px;
   border-radius: 999px;
-  background: #e7f4f7;
-  color: var(--primary-dark);
+  background: linear-gradient(180deg, #dff5f9 0%, #cbeaf0 100%);
+  border: 1px solid #8dc9d4;
+  color: #1f6f80;
   font-size: 10px;
   font-weight: 800;
+  line-height: 1;
+  box-shadow: 0 1px 4px rgba(47, 143, 163, 0.16);
+}
+.table-selected-mark-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--primary);
+  color: #fff;
+  font-size: 9px;
   line-height: 1;
 }
 .compat-table tbody tr.is-selected td {
@@ -1506,6 +1576,7 @@ body {
     padding: 10px;
   }
   .aggregate-selector-head,
+  .aggregate-results-head,
   .aggregate-table-actions {
     flex-direction: column;
     align-items: stretch;
@@ -4274,6 +4345,8 @@ var currentTableMode = "single";
 var selectedTableMedIds = [];
 var aggregateDetailState = { good: false, ok: false, bad: false };
 var showTableDetailInMulti = false;
+var pendingAggregateResultFocus = false;
+var pendingAggregateResultPulse = false;
 
 function getTableMeds() {
   var list = getPublicMedicines();
@@ -4426,6 +4499,64 @@ function renderAggregateGroup(key, title, items, emptyText) {
   return h;
 }
 
+function renderAggregateResultsPanel(selectedMeds) {
+  var h = '<div class="aggregate-results-panel" id="aggregateResultsPanel">';
+  h += '<div class="aggregate-results-head">';
+  h += '<div><div class="aggregate-results-title">処方のまとめ結果</div>';
+  if (selectedMeds.length >= 2) {
+    h += '<div class="aggregate-results-sub">' + selectedMeds.length + '剤に共通する候補をすぐ確認できます。</div>';
+  } else {
+    h += '<div class="aggregate-results-sub">結果はここに表示されます。まずは薬を2剤以上選んでください。</div>';
+  }
+  h += '</div>';
+  h += '<div class="aggregate-results-badge">' + (selectedMeds.length >= 2 ? '結果を更新済み' : '選択待ち') + '</div>';
+  h += '</div>';
+  if (selectedMeds.length < 2) {
+    h += '<div class="aggregate-results-placeholder">あと' + (2 - selectedMeds.length) + '剤選ぶと、共通して飲みやすい候補・まあまあな候補・NG候補がここにまとまって表示されます。</div>';
+    h += '</div>';
+    return h;
+  }
+  h += '<div class="aggregate-selected-list">';
+  selectedMeds.forEach(function(med) {
+    h += '<span class="aggregate-selected-pill">' + escapeHtml(getDisplayName(med)) + '<button type="button" class="aggregate-pill-remove" data-remove-selected-id="' + escapeHtml(med.id) + '" aria-label="' + escapeHtml(getDisplayName(med)) + 'を選択解除">×</button></span>';
+  });
+  h += '</div>';
+  var summary = buildAggregateCompatSummary(selectedMeds);
+  h += '<div class="aggregate-groups">';
+  h += renderAggregateGroup("good", '✅ すべてに飲みやすい', summary.good, "全ての薬で飲みやすい食品はまだありません。");
+  h += renderAggregateGroup("ok", '▲ まあまあ / 概ね問題なし', summary.ok, "飲みにくいものを除いて、無難に使える食品はまだありません。");
+  h += renderAggregateGroup("bad", '⚠ いずれかでNG', summary.bad, "選択中の薬で明確なNG食品はありません。");
+  h += '</div>';
+  h += '<div class="aggregate-table-actions">';
+  h += '<div class="aggregate-table-note">個別の行列表は確認用です。共通候補の判断は上の集計を優先してください。</div>';
+  h += '<button type="button" class="aggregate-table-toggle" id="toggleMultiTableBtn">' + (showTableDetailInMulti ? '個別表を隠す' : '個別表で確認する') + '</button>';
+  h += '</div>';
+  h += '</div>';
+  return h;
+}
+
+function flushAggregateResultFeedback() {
+  var panel = document.getElementById("aggregateResultsPanel");
+  if (!panel) {
+    pendingAggregateResultFocus = false;
+    pendingAggregateResultPulse = false;
+    return;
+  }
+  if (pendingAggregateResultFocus && typeof panel.scrollIntoView === "function") {
+    try { panel.scrollIntoView({ behavior: "smooth", block: "nearest" }); } catch (err) {}
+  }
+  if (pendingAggregateResultFocus || pendingAggregateResultPulse) {
+    panel.classList.remove("is-updated");
+    void panel.offsetWidth;
+    panel.classList.add("is-updated");
+    setTimeout(function() {
+      panel.classList.remove("is-updated");
+    }, 800);
+  }
+  pendingAggregateResultFocus = false;
+  pendingAggregateResultPulse = false;
+}
+
 function renderTableAggregateSummary(filteredMeds) {
   var container = document.getElementById("tableAggregateSummary");
   if (!container) return;
@@ -4433,6 +4564,8 @@ function renderTableAggregateSummary(filteredMeds) {
   if (currentTableMode !== "multi") {
     container.classList.remove("is-active");
     container.innerHTML = "";
+    pendingAggregateResultFocus = false;
+    pendingAggregateResultPulse = false;
     return;
   }
   var selectedMeds = filteredMeds.filter(function(med) { return selectedTableMedIds.indexOf(med.id) !== -1; });
@@ -4446,28 +4579,13 @@ function renderTableAggregateSummary(filteredMeds) {
   h += '</div>';
   h += '<button type="button" class="aggregate-summary-clear" id="clearTableSelectionsBtn">選択解除</button>';
   h += '</div>';
+  h += '<div class="aggregate-summary-shell">';
   h += renderAggregateMedSelector(filteredMeds);
-  if (selectedMeds.length) {
-    h += '<div class="aggregate-selected-list">';
-    selectedMeds.forEach(function(med) {
-      h += '<span class="aggregate-selected-pill">' + escapeHtml(getDisplayName(med)) + '<button type="button" class="aggregate-pill-remove" data-remove-selected-id="' + escapeHtml(med.id) + '" aria-label="' + escapeHtml(getDisplayName(med)) + 'を選択解除">×</button></span>';
-    });
-    h += '</div>';
-  }
-  if (selectedMeds.length >= 2) {
-    var summary = buildAggregateCompatSummary(selectedMeds);
-    h += '<div class="aggregate-groups">';
-    h += renderAggregateGroup("good", '✅ すべてに飲みやすい', summary.good, "全ての薬で飲みやすい食品はまだありません。");
-    h += renderAggregateGroup("ok", '▲ まあまあ / 概ね問題なし', summary.ok, "飲みにくいものを除いて、無難に使える食品はまだありません。");
-    h += renderAggregateGroup("bad", '⚠ いずれかでNG', summary.bad, "選択中の薬で明確なNG食品はありません。");
-    h += '</div>';
-  }
-  h += '<div class="aggregate-table-actions">';
-  h += '<div class="aggregate-table-note">個別の行列表は確認用です。共通候補の判断は上の集計を優先してください。</div>';
-  h += '<button type="button" class="aggregate-table-toggle" id="toggleMultiTableBtn">' + (showTableDetailInMulti ? '個別表を隠す' : '個別表で確認する') + '</button>';
+  h += renderAggregateResultsPanel(selectedMeds);
   h += '</div>';
   container.innerHTML = h;
   container.classList.add("is-active");
+  flushAggregateResultFeedback();
 }
 
 function openMedPopup(id) {
@@ -4560,7 +4678,7 @@ function renderCompatTable() {
         bodyHtml += '<td class="cat-cell" rowspan="' + meds.length + '">' + cl + '</td>';
       }
       var faved = isFav(m.id);
-      bodyHtml += '<td class="name-cell"><button type="button" data-med-id="' + escapeHtml(m.id) + '">' + escapeHtml(getDisplayName(m)) + '</button>' + (currentTableMode === "multi" && isSelected ? '<span class="table-selected-mark">選択中</span>' : '') + '</td>';
+      bodyHtml += '<td class="name-cell"><button type="button" data-med-id="' + escapeHtml(m.id) + '">' + escapeHtml(getDisplayName(m)) + '</button>' + (currentTableMode === "multi" && isSelected ? '<span class="table-selected-mark"><span class="table-selected-mark-icon">✓</span>選択中</span>' : '') + '</td>';
       bodyHtml += '<td class="fav-cell"><button class="fav-btn table-fav-btn ' + (faved ? "active" : "") + '" data-fav-id="' + m.id + '" aria-label="お気に入り" onclick="handleFav(event,\'' + m.id + '\')">' + getFavIcon(faved) + '</button></td>';
       bodyHtml += '<td class="taste-cell">' + getTasteLabel(m) + '</td>';
       bodyHtml += '<td class="flavor-cell">' + getDisplayFlavorLabel(m) + '</td>';
@@ -4585,6 +4703,8 @@ document.getElementById("tableModeSwitch").addEventListener("click", function(e)
   if (!btn) return;
   currentTableMode = btn.dataset.tableMode;
   showTableDetailInMulti = false;
+  pendingAggregateResultFocus = false;
+  pendingAggregateResultPulse = false;
   if (currentTableMode !== "multi") clearTableSelections();
   renderCompatTable();
 });
@@ -4596,6 +4716,8 @@ document.getElementById("tableFilterTabs").addEventListener("click", function(e)
   tab.classList.add("active");
   currentTableFilter = tab.dataset.tfilter;
   showTableDetailInMulti = false;
+  pendingAggregateResultFocus = false;
+  pendingAggregateResultPulse = false;
   clearTableSelections();
   renderCompatTable();
 });
@@ -4609,15 +4731,22 @@ document.getElementById("compatTable").addEventListener("click", function(e) {
 document.getElementById("tableAggregateSummary").addEventListener("click", function(e) {
   var chipBtn = e.target.closest("[data-select-chip-id]");
   if (chipBtn) {
+    var previousCount = selectedTableMedIds.length;
     var medId = chipBtn.dataset.selectChipId;
     var willSelect = selectedTableMedIds.indexOf(medId) === -1;
     toggleTableSelection(medId, willSelect);
+    var nextCount = selectedTableMedIds.length;
+    pendingAggregateResultFocus = previousCount < 2 && nextCount >= 2;
+    pendingAggregateResultPulse = !pendingAggregateResultFocus && nextCount >= 2 && previousCount !== nextCount;
     renderCompatTable();
     return;
   }
   var removeBtn = e.target.closest("[data-remove-selected-id]");
   if (removeBtn) {
+    var previousRemoveCount = selectedTableMedIds.length;
     toggleTableSelection(removeBtn.dataset.removeSelectedId, false);
+    pendingAggregateResultFocus = false;
+    pendingAggregateResultPulse = previousRemoveCount >= 2 && selectedTableMedIds.length >= 2;
     renderCompatTable();
     return;
   }
@@ -4637,6 +4766,8 @@ document.getElementById("tableAggregateSummary").addEventListener("click", funct
   var clearBtn = e.target.closest("#clearTableSelectionsBtn");
   if (!clearBtn) return;
   clearTableSelections();
+  pendingAggregateResultFocus = false;
+  pendingAggregateResultPulse = false;
   renderCompatTable();
 });
 
