@@ -667,6 +667,174 @@ body {
   scrollbar-width: none;
 }
 .table-filter-tabs::-webkit-scrollbar { display: none; }
+.table-tools {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 0 16px 10px;
+}
+.table-mode-switch {
+  display: inline-flex;
+  gap: 6px;
+  padding: 4px;
+  border-radius: 999px;
+  background: #eef7f8;
+  border: 1px solid #dcecee;
+  align-self: flex-start;
+}
+.table-mode-btn {
+  border: none;
+  background: transparent;
+  color: var(--text-light);
+  font-size: 12px;
+  font-weight: 700;
+  padding: 6px 12px;
+  border-radius: 999px;
+  cursor: pointer;
+}
+.table-mode-btn.active {
+  background: #fff;
+  color: var(--primary);
+  box-shadow: 0 1px 3px rgba(47, 143, 163, 0.18);
+}
+.table-aggregate-summary {
+  display: none;
+  padding: 14px;
+  border-radius: 16px;
+  background: linear-gradient(180deg, #ffffff 0%, #f8fcfd 100%);
+  border: 1px solid #dcecee;
+  box-shadow: 0 6px 16px rgba(47, 143, 163, 0.08);
+}
+.table-aggregate-summary.is-active {
+  display: block;
+}
+.aggregate-summary-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+.aggregate-summary-title {
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--text);
+}
+.aggregate-summary-sub {
+  margin-top: 2px;
+  font-size: 11px;
+  color: var(--text-light);
+  line-height: 1.5;
+}
+.aggregate-summary-clear {
+  border: 1px solid #d7e7ea;
+  background: #fff;
+  color: var(--text-light);
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 6px 10px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.aggregate-selected-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+}
+.aggregate-selected-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  border-radius: 999px;
+  background: #eef7f8;
+  color: var(--primary-dark);
+  font-size: 11px;
+  font-weight: 700;
+}
+.aggregate-groups {
+  display: grid;
+  gap: 10px;
+  margin-top: 12px;
+}
+.aggregate-group {
+  border-radius: 14px;
+  padding: 12px;
+}
+.aggregate-group.good {
+  background: #eefaf3;
+  border: 1px solid #d7efdf;
+}
+.aggregate-group.ok {
+  background: #f3f5f7;
+  border: 1px solid #e1e6ea;
+}
+.aggregate-group.bad {
+  background: #fff3f3;
+  border: 1px solid #f1d7d7;
+}
+.aggregate-group-title {
+  font-size: 12px;
+  font-weight: 800;
+  margin-bottom: 8px;
+}
+.aggregate-group.good .aggregate-group-title { color: #24794d; }
+.aggregate-group.ok .aggregate-group-title { color: #5d6b75; }
+.aggregate-group.bad .aggregate-group-title { color: #c44b45; }
+.aggregate-list {
+  display: grid;
+  gap: 8px;
+}
+.aggregate-item {
+  border-radius: 12px;
+  padding: 9px 10px;
+  background: rgba(255,255,255,0.88);
+}
+.aggregate-item-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--text);
+}
+.aggregate-item-icon {
+  font-size: 14px;
+  line-height: 1;
+}
+.aggregate-item-note {
+  margin-top: 4px;
+  font-size: 11px;
+  color: var(--text-light);
+  line-height: 1.5;
+}
+.aggregate-empty {
+  font-size: 11px;
+  color: var(--text-light);
+  line-height: 1.6;
+}
+.table-select-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+.table-select-checkbox {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--primary);
+  flex-shrink: 0;
+}
+.compat-table tbody tr.is-selected td {
+  background: #eef8fa;
+}
+.compat-table tbody tr.is-selected .cat-cell {
+  background: #d9edf1;
+}
+.compat-table tbody tr.is-selected .name-cell {
+  background: #e1f2f5;
+}
 
 /* お気に入り */
 .fav-btn {
@@ -1231,6 +1399,13 @@ body {
   <div class="table-hint"><strong>見方:</strong> 左の「商品名」は固定です。表は左右にスクロールできるので、右側の飲み合わせ評価を見比べてください。</div>
   <div class="review-note" id="tableReviewNote"></div>
   <div class="table-filter-tabs" id="tableFilterTabs"></div>
+  <div class="table-tools">
+    <div class="table-mode-switch" id="tableModeSwitch">
+      <button type="button" class="table-mode-btn active" data-table-mode="single">単剤表示</button>
+      <button type="button" class="table-mode-btn" data-table-mode="multi">複数薬まとめ</button>
+    </div>
+    <div class="table-aggregate-summary" id="tableAggregateSummary"></div>
+  </div>
   <div class="result-count" id="tableCount" style="padding-top:0;"></div>
   <div class="compat-sticky-head" id="compatStickyHead"></div>
   <div class="table-wrap" id="tableScrollWrap">
@@ -3876,10 +4051,160 @@ function getCatLabel(med) {
 }
 
 var currentTableFilter = "all";
+var currentTableMode = "single";
+var selectedTableMedIds = [];
 
 function getTableMeds() {
   var list = getPublicMedicines();
   return filterByPublicCategory(list, currentTableFilter);
+}
+
+function renderTableModeSwitch() {
+  var container = document.getElementById("tableModeSwitch");
+  if (!container) return;
+  container.querySelectorAll(".table-mode-btn").forEach(function(btn) {
+    btn.classList.toggle("active", btn.dataset.tableMode === currentTableMode);
+  });
+}
+
+function clearTableSelections() {
+  selectedTableMedIds = [];
+}
+
+function toggleTableSelection(id, checked) {
+  if (checked) {
+    if (selectedTableMedIds.indexOf(id) === -1) selectedTableMedIds.push(id);
+  } else {
+    selectedTableMedIds = selectedTableMedIds.filter(function(itemId) { return itemId !== id; });
+  }
+}
+
+function getAggregateCompatStatusLabel(code) {
+  if (code === "G") return "飲みやすい";
+  if (code === "O") return "変わらない";
+  if (code === "B") return "飲みにくい";
+  return "データなし";
+}
+
+function getCompatEntryMap(med) {
+  var entries = getCompatEntries(med);
+  var map = {};
+  entries.good.forEach(function(item) { map[item.name] = { code: "G", note: item.note }; });
+  entries.ok.forEach(function(item) { map[item.name] = { code: "O", note: item.note }; });
+  entries.bad.forEach(function(item) { map[item.name] = { code: "B", note: item.note }; });
+  entries.none.forEach(function(item) { map[item.name] = { code: "N", note: item.note }; });
+  foodCols.forEach(function(name) {
+    if (!map[name]) map[name] = { code: "N", note: "資料上: データなし" };
+  });
+  return map;
+}
+
+function buildAggregateCompatSummary(meds) {
+  var summary = { good: [], ok: [], bad: [] };
+  if (!meds.length) return summary;
+  var compatMaps = {};
+  meds.forEach(function(med) { compatMaps[med.id] = getCompatEntryMap(med); });
+  foodCols.forEach(function(foodName) {
+    var perMed = meds.map(function(med) {
+      var entry = compatMaps[med.id][foodName];
+      return {
+        medName: getDisplayName(med),
+        code: entry.code,
+        note: entry.note
+      };
+    });
+    var hasBad = perMed.some(function(item) { return item.code === "B"; });
+    var allGood = perMed.every(function(item) { return item.code === "G"; });
+    var anyGoodOrOk = perMed.some(function(item) { return item.code === "G" || item.code === "O"; });
+    if (hasBad) {
+      summary.bad.push({
+        name: foodName,
+        icon: officialFoodIcons[foodName] || "•",
+        note: perMed.filter(function(item) { return item.code === "B"; }).map(function(item) {
+          return item.medName + "でNG";
+        }).join(" / ")
+      });
+      return;
+    }
+    if (allGood) {
+      summary.good.push({
+        name: foodName,
+        icon: officialFoodIcons[foodName] || "•",
+        note: perMed.map(function(item) {
+          return item.medName + ": " + item.note;
+        }).join(" / ")
+      });
+      return;
+    }
+    if (anyGoodOrOk) {
+      summary.ok.push({
+        name: foodName,
+        icon: officialFoodIcons[foodName] || "•",
+        note: perMed.map(function(item) {
+          return item.medName + ": " + getAggregateCompatStatusLabel(item.code);
+        }).join(" / ")
+      });
+    }
+  });
+  return summary;
+}
+
+function renderAggregateGroup(key, title, items, emptyText) {
+  var h = '<div class="aggregate-group ' + key + '">';
+  h += '<div class="aggregate-group-title">' + title + '</div>';
+  if (!items.length) {
+    h += '<div class="aggregate-empty">' + emptyText + '</div>';
+  } else {
+    h += '<div class="aggregate-list">';
+    items.forEach(function(item) {
+      h += '<div class="aggregate-item">';
+      h += '<div class="aggregate-item-head"><span class="aggregate-item-icon">' + item.icon + '</span><span>' + item.name + '</span></div>';
+      h += '<div class="aggregate-item-note">' + item.note + '</div>';
+      h += '</div>';
+    });
+    h += '</div>';
+  }
+  h += '</div>';
+  return h;
+}
+
+function renderTableAggregateSummary(filteredMeds) {
+  var container = document.getElementById("tableAggregateSummary");
+  if (!container) return;
+  renderTableModeSwitch();
+  if (currentTableMode !== "multi") {
+    container.classList.remove("is-active");
+    container.innerHTML = "";
+    return;
+  }
+  var selectedMeds = filteredMeds.filter(function(med) { return selectedTableMedIds.indexOf(med.id) !== -1; });
+  var h = '<div class="aggregate-summary-head">';
+  h += '<div><div class="aggregate-summary-title">複数薬まとめ</div>';
+  if (selectedMeds.length < 2) {
+    h += '<div class="aggregate-summary-sub">薬名左のチェックで2剤以上選ぶと、処方に共通する候補をまとめます。</div>';
+  } else {
+    h += '<div class="aggregate-summary-sub">' + selectedMeds.length + '剤に共通する候補を、資料上の相性から集計しています。</div>';
+  }
+  h += '</div>';
+  h += '<button type="button" class="aggregate-summary-clear" id="clearTableSelectionsBtn">選択解除</button>';
+  h += '</div>';
+  if (selectedMeds.length) {
+    h += '<div class="aggregate-selected-list">';
+    selectedMeds.forEach(function(med) {
+      h += '<span class="aggregate-selected-pill">' + escapeHtml(getDisplayName(med)) + '</span>';
+    });
+    h += '</div>';
+  }
+  if (selectedMeds.length >= 2) {
+    var summary = buildAggregateCompatSummary(selectedMeds);
+    h += '<div class="aggregate-groups">';
+    h += renderAggregateGroup("good", '✅ すべてに飲みやすい', summary.good, "全ての薬で飲みやすい食品はまだありません。");
+    h += renderAggregateGroup("ok", '▲ まあまあ / 概ね問題なし', summary.ok, "飲みにくいものを除いて、無難に使える食品はまだありません。");
+    h += renderAggregateGroup("bad", '⚠ いずれかでNG', summary.bad, "選択中の薬で明確なNG食品はありません。");
+    h += '</div>';
+  }
+  container.innerHTML = h;
+  container.classList.add("is-active");
 }
 
 function openMedPopup(id) {
@@ -3917,9 +4242,13 @@ function renderCompatTable() {
   var foodLabels = foodCols;
   var headHtml = "<thead><tr>";
   var bodyHtml = "<tbody>";
+  if (currentTableMode !== "multi") clearTableSelections();
+  selectedTableMedIds = selectedTableMedIds.filter(function(id) {
+    return filtered.some(function(med) { return med.id === id; });
+  });
 
   headHtml += '<th class="cat-head" style="min-width:28px;">\u7A2E\u985E</th>';
-  headHtml += '<th class="name-cell" style="background:linear-gradient(180deg, var(--table-head-bg) 0%, var(--primary) 100%);color:#fff;">\u5546\u54C1\u540D</th>';
+  headHtml += '<th class="name-cell" style="background:linear-gradient(180deg, var(--table-head-bg) 0%, var(--primary) 100%);color:#fff;">' + (currentTableMode === "multi" ? "\u9078\u629E\u30FB\u5546\u54C1\u540D" : "\u5546\u54C1\u540D") + '</th>';
   headHtml += '<th class="fav-col">お気に入り</th>';
   headHtml += '<th style="min-width:50px;">\u5473</th>';
   headHtml += '<th style="min-width:50px;">\u9999\u308A</th>';
@@ -3933,6 +4262,7 @@ function renderCompatTable() {
     document.getElementById("compatStickyHead").innerHTML = '<table class="compat-table">' + headHtml + '</table>';
     syncCompatStickyHead();
     document.getElementById("tableCount").textContent = buildPublicCountText(0, totalPublic);
+    renderTableAggregateSummary(filtered);
     updatePublicReviewNotes();
     return;
   }
@@ -3950,12 +4280,17 @@ function renderCompatTable() {
     var meds = groups[cl];
     meds.forEach(function(m, idx) {
       var compat = getMedCompat(m);
-      bodyHtml += "<tr>";
+      var isSelected = selectedTableMedIds.indexOf(m.id) !== -1;
+      bodyHtml += '<tr' + (isSelected ? ' class="is-selected"' : '') + '>';
       if (idx === 0) {
         bodyHtml += '<td class="cat-cell" rowspan="' + meds.length + '">' + cl + '</td>';
       }
       var faved = isFav(m.id);
-      bodyHtml += '<td class="name-cell"><button type="button" data-med-id="' + escapeHtml(m.id) + '">' + escapeHtml(getDisplayName(m)) + '</button></td>';
+      if (currentTableMode === "multi") {
+        bodyHtml += '<td class="name-cell"><div class="table-select-wrap"><input class="table-select-checkbox" type="checkbox" data-select-med-id="' + escapeHtml(m.id) + '" aria-label="' + escapeHtml(getDisplayName(m)) + 'をまとめ対象に追加" ' + (isSelected ? 'checked' : '') + '><button type="button" data-med-id="' + escapeHtml(m.id) + '">' + escapeHtml(getDisplayName(m)) + '</button></div></td>';
+      } else {
+        bodyHtml += '<td class="name-cell"><button type="button" data-med-id="' + escapeHtml(m.id) + '">' + escapeHtml(getDisplayName(m)) + '</button></td>';
+      }
       bodyHtml += '<td class="fav-cell"><button class="fav-btn table-fav-btn ' + (faved ? "active" : "") + '" data-fav-id="' + m.id + '" aria-label="お気に入り" onclick="handleFav(event,\'' + m.id + '\')">' + getFavIcon(faved) + '</button></td>';
       bodyHtml += '<td class="taste-cell">' + getTasteLabel(m) + '</td>';
       bodyHtml += '<td class="flavor-cell">' + getDisplayFlavorLabel(m) + '</td>';
@@ -3969,9 +4304,18 @@ function renderCompatTable() {
   document.getElementById("compatTable").innerHTML = headHtml + bodyHtml;
   document.getElementById("compatStickyHead").innerHTML = '<table class="compat-table">' + headHtml + '</table>';
   syncCompatStickyHead();
-  document.getElementById("tableCount").textContent = buildPublicCountText(filtered.length, totalPublic);
+  document.getElementById("tableCount").textContent = buildPublicCountText(filtered.length, totalPublic) + (currentTableMode === "multi" && selectedTableMedIds.length ? ' / 選択 ' + selectedTableMedIds.length + '剤' : '');
+  renderTableAggregateSummary(filtered);
   updatePublicReviewNotes();
 }
+
+document.getElementById("tableModeSwitch").addEventListener("click", function(e) {
+  var btn = e.target.closest(".table-mode-btn");
+  if (!btn) return;
+  currentTableMode = btn.dataset.tableMode;
+  if (currentTableMode !== "multi") clearTableSelections();
+  renderCompatTable();
+});
 
 document.getElementById("tableFilterTabs").addEventListener("click", function(e) {
   var tab = e.target.closest(".filter-tab");
@@ -3979,6 +4323,7 @@ document.getElementById("tableFilterTabs").addEventListener("click", function(e)
   document.querySelectorAll("#tableFilterTabs .filter-tab").forEach(function(t) { t.classList.remove("active"); });
   tab.classList.add("active");
   currentTableFilter = tab.dataset.tfilter;
+  clearTableSelections();
   renderCompatTable();
 });
 
@@ -3986,6 +4331,20 @@ document.getElementById("compatTable").addEventListener("click", function(e) {
   var btn = e.target.closest("button[data-med-id]");
   if (!btn) return;
   openMedPopup(btn.dataset.medId);
+});
+
+document.getElementById("compatTable").addEventListener("change", function(e) {
+  var checkbox = e.target.closest(".table-select-checkbox");
+  if (!checkbox) return;
+  toggleTableSelection(checkbox.dataset.selectMedId, checkbox.checked);
+  renderCompatTable();
+});
+
+document.getElementById("tableAggregateSummary").addEventListener("click", function(e) {
+  var clearBtn = e.target.closest("#clearTableSelectionsBtn");
+  if (!clearBtn) return;
+  clearTableSelections();
+  renderCompatTable();
 });
 
 function syncMemoTextareas(id, value, sourceEl) {
