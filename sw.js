@@ -1,26 +1,26 @@
-var CACHE_NAME = "kusuri-navi-v1";
+var CACHE_NAME = "kusuri-navi-v2";
 var URLS_TO_CACHE = [
   "/",
   "/index.html",
   "/manifest.json"
 ];
 
-self.addEventListener("install", function(event) {
+self.addEventListener("install", function (event) {
   event.waitUntil(
-    caches.open(CACHE_NAME).then(function(cache) {
+    caches.open(CACHE_NAME).then(function (cache) {
       return cache.addAll(URLS_TO_CACHE);
     })
   );
   self.skipWaiting();
 });
 
-self.addEventListener("activate", function(event) {
+self.addEventListener("activate", function (event) {
   event.waitUntil(
-    caches.keys().then(function(names) {
+    caches.keys().then(function (names) {
       return Promise.all(
-        names.filter(function(name) {
+        names.filter(function (name) {
           return name !== CACHE_NAME;
-        }).map(function(name) {
+        }).map(function (name) {
           return caches.delete(name);
         })
       );
@@ -29,15 +29,15 @@ self.addEventListener("activate", function(event) {
   self.clients.claim();
 });
 
-self.addEventListener("fetch", function(event) {
+self.addEventListener("fetch", function (event) {
   event.respondWith(
-    fetch(event.request).then(function(response) {
+    fetch(event.request).then(function (response) {
       var responseClone = response.clone();
-      caches.open(CACHE_NAME).then(function(cache) {
+      caches.open(CACHE_NAME).then(function (cache) {
         cache.put(event.request, responseClone);
       });
       return response;
-    }).catch(function() {
+    }).catch(function () {
       return caches.match(event.request);
     })
   );
