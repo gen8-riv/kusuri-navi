@@ -1592,8 +1592,11 @@ body {
   gap: 12px;
 }
 .install-banner-icon {
-  font-size: 28px;
   flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
 }
 .install-banner-text {
   flex: 1;
@@ -5614,7 +5617,7 @@ window.addEventListener("resize", updateStickyMetrics);
     if (type === "chrome") {
       // Android / PC Chrome
       content.innerHTML =
-        '<span class="install-banner-icon">📱</span>' +
+        '<img class="install-banner-icon" src="/icons/icon-192.png" alt="おくすり味ナビ">' +
         '<div class="install-banner-text">' +
           '<strong>ホーム画面に追加しませんか？</strong>' +
           'アプリとして使えて、薬の検索がもっと便利になります' +
@@ -5630,7 +5633,7 @@ window.addEventListener("resize", updateStickyMetrics);
     } else if (type === "ios") {
       // iOS Safari
       content.innerHTML =
-        '<span class="install-banner-icon">📱</span>' +
+        '<img class="install-banner-icon" src="/icons/icon-192.png" alt="おくすり味ナビ">' +
         '<div class="install-banner-text">' +
           '<strong>ホーム画面に追加しませんか？</strong>' +
           'アプリとして使えて、薬の検索がもっと便利になります' +
