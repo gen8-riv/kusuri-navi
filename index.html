@@ -1573,11 +1573,11 @@ body {
   z-index: 99;
   box-shadow: 0 8px 24px rgba(47, 143, 163, 0.3);
   display: none;
-  animation: installBannerIn 0.4s ease-out;
+  animation: installBannerIn 0.6s cubic-bezier(0.22, 0.61, 0.36, 1);
 }
 @keyframes installBannerIn {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
+  from { opacity: 0; transform: translateY(30px) scale(0.97); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
 }
 .install-banner.hiding {
   animation: installBannerOut 0.3s ease-in forwards;
@@ -1763,7 +1763,7 @@ body {
   </div>
 
   <div class="footer">
-    <div class="footer-update">最終データ更新: 2025年6月</div>
+    <div class="footer-update">最終データ更新: 2026年3月</div>
     <div class="footer-source">
       出典: <a href="https://www.ncchd.go.jp/hospital/about/section/medicine/nomiawase.pdf" target="_blank" rel="noopener">国立成育医療研究センター 薬剤部「粉薬と服薬補助食品の飲み合わせ」</a>
     </div>
@@ -1803,7 +1803,7 @@ body {
     <table class="compat-table" id="compatTable"></table>
   </div>
   <div class="footer">
-    <div class="footer-update">最終データ更新: 2025年6月</div>
+    <div class="footer-update">最終データ更新: 2026年3月</div>
     <div class="footer-source">
       出典: <a href="https://www.ncchd.go.jp/hospital/about/section/medicine/nomiawase.pdf" target="_blank" rel="noopener">国立成育医療研究センター 薬剤部「粉薬と服薬補助食品の飲み合わせ」</a>
     </div>
@@ -1832,7 +1832,7 @@ body {
     <p id="savedEmptyMessage">保存済みの薬はありません</p>
   </div>
   <div class="footer">
-    <div class="footer-update">最終データ更新: 2025年6月</div>
+    <div class="footer-update">最終データ更新: 2026年3月</div>
     <div class="footer-source">
       出典: <a href="https://www.ncchd.go.jp/hospital/about/section/medicine/nomiawase.pdf" target="_blank" rel="noopener">国立成育医療研究センター 薬剤部「粉薬と服薬補助食品の飲み合わせ」</a>
     </div>
@@ -5607,7 +5607,7 @@ window.addEventListener("resize", updateStickyMetrics);
 
   // iOS: 遅延表示
   if (isIOS) {
-    setTimeout(function() { showBanner("ios"); }, 2000);
+    setTimeout(function() { showBanner("ios"); }, 1000);
   }
 
   function showBanner(type) {
@@ -5616,8 +5616,8 @@ window.addEventListener("resize", updateStickyMetrics);
       content.innerHTML =
         '<span class="install-banner-icon">📱</span>' +
         '<div class="install-banner-text">' +
-          '<strong>ホーム画面に追加</strong>' +
-          'アプリとしていつでもすぐに使えます' +
+          '<strong>ホーム画面に追加しませんか？</strong>' +
+          'アプリとして使えて、薬の検索がもっと便利になります' +
         '</div>' +
         '<button class="install-banner-btn" id="installBtn">追加する</button>';
       banner.style.display = "block";
@@ -5632,10 +5632,11 @@ window.addEventListener("resize", updateStickyMetrics);
       content.innerHTML =
         '<span class="install-banner-icon">📱</span>' +
         '<div class="install-banner-text">' +
-          '<strong>ホーム画面に追加</strong>' +
+          '<strong>ホーム画面に追加しませんか？</strong>' +
           '<div class="install-banner-steps">' +
+            '下の ' +
             '<svg class="share-icon" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v7a2 2 0 002 2h12a2 2 0 002-2v-7"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>' +
-            ' をタップ → 「ホーム画面に追加」' +
+            ' → 「ホーム画面に追加」で、アプリとして使えます' +
           '</div>' +
         '</div>';
       banner.style.display = "block";
