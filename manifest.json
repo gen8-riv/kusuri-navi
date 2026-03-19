@@ -1,6 +1,6 @@
 {
-  "name": "こなぐすり味ナビ",
-  "short_name": "こなぐすりナビ",
+  "name": "おくすり味ナビ",
+  "short_name": "おくすり味ナビ",
   "description": "公的資料ベースで小児粉薬の味・飲み合わせを確認",
   "start_url": "/",
   "display": "standalone",
